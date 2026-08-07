@@ -1,0 +1,22 @@
+{
+  "name": "journey-of-lokha",
+  "version": "1.0.0",
+  "description": "Clean, highly-readable, native-feature Ghost theme for Lokha.",
+  "author": {
+    "name": "Lokha AI",
+    "email": "hi@lokha.today"
+  },
+  "engines": {
+    "ghost": "^5.0.0"
+  },
+  "config": {
+    "posts_per_page": 9,
+    "card_assets": true
+  },
+  "keywords": [
+    "ghost-theme",
+    "clean",
+    "readable",
+    "journey-of-lokha"
+  ]
+}

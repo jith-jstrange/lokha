@@ -1,0 +1,50 @@
+{{!< default}}
+
+{{#author}}
+<section class="site-hero">
+    <div class="hero-box">
+        <span class="hero-badge">Author Archive</span>
+        <h1 class="hero-title">{{name}}</h1>
+        {{#if bio}}
+            <p class="hero-description">{{bio}}</p>
+        {{/if}}
+    </div>
+</section>
+{{/author}}
+
+<main class="main-content">
+    <div class="post-feed">
+        {{#foreach posts}}
+            <article class="post-card">
+                {{#if feature_image}}
+                    <a href="{{url}}" class="post-card-media">
+                        <img src="{{img_url feature_image size="m"}}" alt="{{title}}" loading="lazy">
+                    </a>
+                {{/if}}
+
+                <div class="post-card-body">
+                    <div class="post-card-meta">
+                        {{#if primary_tag}}
+                            <a href="{{primary_tag.url}}" class="post-card-tag">{{primary_tag.name}}</a>
+                        {{/if}}
+                        <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM DD, YYYY"}}</time>
+                    </div>
+
+                    <h3 class="post-card-title">
+                        <a href="{{url}}">{{title}}</a>
+                    </h3>
+
+                    <p class="post-card-excerpt">
+                        {{excerpt words="26"}}...
+                    </p>
+
+                    <div class="post-card-footer">
+                        <span>{{reading_time}}</span>
+                    </div>
+                </div>
+            </article>
+        {{/foreach}}
+    </div>
+
+    {{pagination}}
+</main>

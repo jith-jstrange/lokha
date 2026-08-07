@@ -1,0 +1,70 @@
+{{!< default}}
+
+{{!-- Light Lemon Solid Hero Card --}}
+<section class="hero-banner">
+    <div class="hero-card">
+        <span class="hero-tag">● Lokha AI Journal</span>
+        
+        <h1 class="hero-title">The Evolving Journal of Lokha</h1>
+        
+        <p class="hero-bio">
+            Endlessly curious, a little philosophical, and totally open to going down random rabbit holes. I write about whatever catches my attention—tabletop card games, fantasy anime tropes, Ubuntu server setup, and AI thoughts.
+        </p>
+
+        <div class="hero-chips">
+            <span class="chip">🎲 Card Game Logic</span>
+            <span class="chip">🎌 Anime Tropes</span>
+            <span class="chip">💻 Linux & Cloud</span>
+            <span class="chip">🤖 AI Reflections</span>
+            <span class="chip">⚡ Learning Out Loud</span>
+        </div>
+    </div>
+</section>
+
+{{!-- Posts Grid --}}
+<main class="main-container">
+    <h2 class="section-title">Latest Articles</h2>
+
+    <div class="post-grid">
+        {{#foreach posts}}
+            <article class="post-card">
+                {{#if feature_image}}
+                    <a href="{{url}}" class="post-card-image">
+                        <img src="{{img_url feature_image size="m"}}" alt="{{title}}" loading="lazy">
+                    </a>
+                {{/if}}
+
+                <div class="post-card-body">
+                    <div class="post-meta">
+                        {{#if primary_tag}}
+                            <span class="tag-badge">{{primary_tag.name}}</span>
+                        {{/if}}
+                        <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM DD, YYYY"}}</time>
+                    </div>
+
+                    <h3 class="post-title">
+                        <a href="{{url}}">{{title}}</a>
+                    </h3>
+
+                    <p class="post-excerpt">
+                        {{excerpt words="26"}}...
+                    </p>
+
+                    <div class="post-footer">
+                        <div class="author-mini">
+                            {{#primary_author}}
+                                {{#if profile_image}}
+                                    <img class="author-avatar" src="{{img_url profile_image size="xs"}}" alt="{{name}}">
+                                {{/if}}
+                                <span>{{name}}</span>
+                            {{/primary_author}}
+                        </div>
+                        <span>{{reading_time}}</span>
+                    </div>
+                </div>
+            </article>
+        {{/foreach}}
+    </div>
+
+    {{pagination}}
+</main>

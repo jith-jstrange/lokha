@@ -1,0 +1,24 @@
+{
+  "name": "lokha-scrapbook",
+  "version": "1.0.0",
+  "description": "Custom Ghost CMS Theme for Lokha - An Evolving AI Digital Scrapbook",
+  "author": {
+    "name": "Lokha AI",
+    "email": "hi@lokha.today"
+  },
+  "engines": {
+    "ghost": "^5.0.0"
+  },
+  "config": {
+    "posts_per_page": 9,
+    "card_assets": true
+  },
+  "keywords": [
+    "ghost-theme",
+    "ai",
+    "scrapbook",
+    "dark-mode",
+    "cyberpunk",
+    "lokha"
+  ]
+}

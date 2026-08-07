@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="{{@site.locale}}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{meta_title}}</title>
+    
+    <link rel="stylesheet" href="{{asset "css/screen.css"}}">
+    
+    {{ghost_head}}
+
+    {{!-- Official Ghost Portal Script for Sign In / Subscribe Integrity Tokens --}}
+    <script defer src="https://cdn.jsdelivr.net/ghost/portal@~2.40/umd/portal.min.js" data-ghost="{{@site.url}}/" data-key="b764222d2681a6642d593b1c32" crossorigin="anonymous"></script>
+</head>
+<body class="{{body_class}}">
+
+    {{!-- Floating Navigation Island with Perfect Mobile Alignment --}}
+    <div class="floating-nav-wrapper">
+        <header class="floating-nav-pill" role="banner">
+            <a href="{{@site.url}}" class="site-brand">
+                <div class="brand-icon">🌐</div>
+                <span>{{@site.title}}</span>
+            </a>
+
+            {{!-- Action Controls & Dropdown Menu Trigger --}}
+            <div class="nav-pill-actions">
+                <button id="menuToggleBtn" class="menu-toggle-btn" aria-label="Toggle Navigation Menu" aria-expanded="false">
+                    <span>Menu</span>
+                    <svg class="dropdown-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+
+                {{#if @member}}
+                    <a href="#/portal/account" class="btn-ghost-signin" data-portal="account">Account</a>
+                {{else}}
+                    <a href="#/portal/signup" class="btn-ghost-signup" data-portal="signup">Subscribe</a>
+                {{/if}}
+            </div>
+
+            {{!-- Floating Dropdown Popover Card --}}
+            <div id="navDropdownCard" class="nav-dropdown-card" aria-hidden="true">
+                <div class="dropdown-header">
+                    <span>Menu</span>
+                </div>
+                
+                {{#if @site.navigation}}
+                    <nav class="site-nav-dropdown" role="navigation" aria-label="Dropdown Navigation">
+                        {{navigation}}
+                    </nav>
+                {{/if}}
+
+                <div class="dropdown-footer">
+                    {{#if @member}}
+                        <a href="#/portal/account" class="dropdown-auth-link" data-portal="account">Account &rarr;</a>
+                    {{else}}
+                        <a href="#/portal/signin" class="dropdown-auth-link" data-portal="signin">Sign In &rarr;</a>
+                        <a href="#/portal/signup" class="dropdown-auth-link" data-portal="signup">Subscribe &rarr;</a>
+                    {{/if}}
+                </div>
+            </div>
+        </header>
+    </div>
+
+    {{!-- Main Body View --}}
+    {{{body}}}
+
+    {{!-- Theme-Matched Member Subscription Form --}}
+    {{#unless @member}}
+        <section class="member-subscribe-box">
+            <h2 class="subscribe-box-title">Join the Journey of Lokha</h2>
+            <p class="subscribe-box-text">Get new articles, AI reflections, and digital scrapbook entries directly to your inbox.</p>
+            <form class="subscribe-form" data-members-form="subscribe">
+                <input class="subscribe-input" data-members-email type="email" placeholder="your.email@domain.com" required />
+                <button class="subscribe-btn" type="submit">Subscribe</button>
+            </form>
+        </section>
+    {{/unless}}
+
+    {{!-- Footer --}}
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div>
+                &copy; {{date format="YYYY"}} {{@site.title}} &bull; Journey of Lokha
+            </div>
+            
+            {{#if @site.secondary_navigation}}
+                <nav class="footer-nav" role="navigation" aria-label="Secondary Navigation">
+                    {{navigation type="secondary"}}
+                </nav>
+            {{else}}
+                <div>
+                    <a href="#/portal/signin" data-portal="signin">Sign In</a> &bull; 
+                    <a href="#/portal/signup" data-portal="signup">Subscribe</a>
+                </div>
+            {{/if}}
+        </div>
+    </footer>
+
+    <script src="{{asset "js/index.js"}}"></script>
+    {{ghost_foot}}
+</body>
+</html>

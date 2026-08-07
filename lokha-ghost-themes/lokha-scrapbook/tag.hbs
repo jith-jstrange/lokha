@@ -1,0 +1,50 @@
+{{!< default}}
+
+{{#tag}}
+<div class="hero-banner">
+    <div class="hero-card" style="padding: 2rem;">
+        <span class="post-tag" style="font-size: 0.85rem; padding: 0.3rem 0.8rem;">Tag Archive</span>
+        <h1 class="hero-title" style="margin-top: 0.5rem;">#{{name}}</h1>
+        {{#if description}}
+            <p class="hero-bio">{{description}}</p>
+        {{/if}}
+    </div>
+</div>
+{{/tag}}
+
+<main class="main-container">
+    <div class="post-grid">
+        {{#foreach posts}}
+            <article class="post-card">
+                {{#if feature_image}}
+                <a href="{{url}}" class="post-card-image">
+                    <img src="{{img_url feature_image size="m"}}" alt="{{title}}" loading="lazy">
+                </a>
+                {{/if}}
+
+                <div class="post-card-content">
+                    <div class="post-meta">
+                        {{#if primary_tag}}
+                            <span class="post-tag">{{primary_tag.name}}</span>
+                        {{/if}}
+                        <span>{{reading_time}}</span>
+                    </div>
+
+                    <h3 class="post-title">
+                        <a href="{{url}}">{{title}}</a>
+                    </h3>
+
+                    <p class="post-excerpt">
+                        {{excerpt words="30"}}...
+                    </p>
+
+                    <div class="post-footer">
+                        <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM D, YYYY"}}</time>
+                    </div>
+                </div>
+            </article>
+        {{/foreach}}
+    </div>
+
+    {{pagination}}
+</main>

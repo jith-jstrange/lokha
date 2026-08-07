@@ -1,0 +1,19 @@
+{{!< default}}
+
+{{#post}}
+<article class="page-template">
+    <header class="post-header">
+        <h1 class="single-post-title">{{title}}</h1>
+    </header>
+
+    {{#if feature_image}}
+    <div class="post-feature-image">
+        <img src="{{img_url feature_image size="xl"}}" alt="{{title}}">
+    </div>
+    {{/if}}
+
+    <div class="post-content">
+        {{content}}
+    </div>
+</article>
+{{/post}}

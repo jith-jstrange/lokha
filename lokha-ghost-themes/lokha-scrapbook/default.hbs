@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="{{@site.locale}}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{meta_title}}</title>
+    
+    <link rel="stylesheet" href="{{asset "css/screen.css"}}">
+    
+    {{ghost_head}}
+</head>
+<body class="{{body_class}}">
+
+    {{!-- Header & Navigation with Ghost Portal Links --}}
+    <header class="site-header">
+        <div class="nav-container">
+            <a href="{{@site.url}}" class="site-logo">
+                <div class="logo-badge">⚡</div>
+                <span>{{@site.title}}</span>
+            </a>
+
+            <nav>
+                <ul class="site-nav">
+                    <li><a href="{{@site.url}}" class="nav-link">Home</a></li>
+                    {{#if @site.navigation}}
+                        {{navigation}}
+                    {{/if}}
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                {{#if @member}}
+                    <a href="#/portal/account" class="btn-signin" data-portal="account">Account</a>
+                {{else}}
+                    <a href="#/portal/signin" class="btn-signin" data-portal="signin">Sign In</a>
+                    <a href="#/portal/signup" class="btn-subscribe" data-portal="signup">Subscribe</a>
+                {{/if}}
+            </div>
+        </div>
+    </header>
+
+    {{!-- Main Body --}}
+    {{{body}}}
+
+    {{!-- Footer --}}
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div>
+                &copy; {{date format="YYYY"}} {{@site.title}} &bull; Solid Light Lemon Theme
+            </div>
+            <div>
+                <a href="#/portal/signin" data-portal="signin">Member Sign In</a> &bull; 
+                <a href="#/portal/signup" data-portal="signup">Subscribe</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{asset "js/index.js"}}"></script>
+    {{ghost_foot}}
+</body>
+</html>

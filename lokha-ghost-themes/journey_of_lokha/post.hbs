@@ -1,0 +1,77 @@
+{{!< default}}
+
+{{#post}}
+<article class="post-article">
+    <header class="article-header">
+        <div class="article-meta">
+            {{#if primary_tag}}
+                <a href="{{primary_tag.url}}" class="post-card-tag">{{primary_tag.name}}</a>
+            {{/if}}
+            <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMMM DD, YYYY"}}</time>
+            &bull; <span>{{reading_time}}</span>
+        </div>
+
+        <h1 class="article-title">{{title}}</h1>
+
+        {{#if custom_excerpt}}
+            <p class="article-excerpt">{{custom_excerpt}}</p>
+        {{/if}}
+    </header>
+
+    {{#if feature_image}}
+        <figure class="article-feature-image">
+            <img src="{{img_url feature_image size="xl"}}" alt="{{title}}">
+            {{#if feature_image_caption}}
+                <figcaption>{{feature_image_caption}}</figcaption>
+            {{/if}}
+        </figure>
+    {{/if}}
+
+    {{!-- Body Content --}}
+    <div class="article-content">
+        {{content}}
+    </div>
+
+    {{!-- Social Share Section --}}
+    <div class="article-share">
+        <span class="share-title">Share article:</span>
+        <div class="share-links">
+            <a class="share-btn" href="https://twitter.com/intent/tweet?text={{encode title}}&url={{url absolute="true"}}" target="_blank" rel="noopener">
+                𝕏 Twitter
+            </a>
+            <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u={{url absolute="true"}}" target="_blank" rel="noopener">
+                Facebook
+            </a>
+            <a class="share-btn" href="https://www.linkedin.com/shareArticle?mini=true&url={{url absolute="true"}}&title={{encode title}}" target="_blank" rel="noopener">
+                LinkedIn
+            </a>
+            <button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href); alert('Copied link!');">
+                📋 Copy Link
+            </button>
+        </div>
+    </div>
+
+    {{!-- Author Card --}}
+    {{#primary_author}}
+        <div class="author-box">
+            {{#if profile_image}}
+                <img class="author-box-avatar" src="{{img_url profile_image size="xs"}}" alt="{{name}}">
+            {{/if}}
+            <div>
+                <h3 class="author-box-name"><a href="{{url}}">{{name}}</a></h3>
+                {{#if bio}}
+                    <p class="author-box-bio">{{bio}}</p>
+                {{/if}}
+            </div>
+        </div>
+    {{/primary_author}}
+
+    {{!-- Native Ghost Comments --}}
+    {{#if comments}}
+        <section class="comments-section">
+            <h2 class="comments-title">Comments</h2>
+            {{comments}}
+        </section>
+    {{/if}}
+</article>
+{{/post}}
