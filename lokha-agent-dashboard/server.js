@@ -816,27 +816,41 @@ GUIDELINES:
     }))
   ];
 
-  // 1. First Call to Groq with tool definitions
-  const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: formattedMessages,
-      tools: groqTools,
-      tool_choice: 'auto',
-      temperature: 0.7,
-      max_completion_tokens: 2048
-    })
-  });
+  async function callGroqWithFallback(payload) {
+    const models = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'];
+    let lastErr = null;
 
-  const groqData = await groqRes.json();
-  if (!groqRes.ok) {
-    throw new Error(`Groq API Error (${groqRes.status}): ${JSON.stringify(groqData)}`);
+    for (const model of models) {
+      try {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ ...payload, model })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.choices && data.choices.length > 0) {
+          return data;
+        }
+        lastErr = new Error(`Groq API Error (${res.status}): ${JSON.stringify(data)}`);
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr;
   }
+
+  // 1. First Call to Groq with tool definitions
+  const groqData = await callGroqWithFallback({
+    messages: formattedMessages,
+    tools: groqTools,
+    tool_choice: 'auto',
+    temperature: 0.7,
+    max_completion_tokens: 2048
+  });
 
   const choice = groqData.choices[0];
   const responseMsg = choice.message;
@@ -852,7 +866,7 @@ GUIDELINES:
       logs.unshift({
         id: 'log-' + Date.now().toString(36),
         timestamp: new Date().toISOString(),
-        agentId: 'groq-llama-70b',
+        agentId: 'groq-reasoner',
         level: 'TOOL_CALL',
         message: `Calling tool: ${name}`,
         meta: { args }
@@ -917,31 +931,24 @@ GUIDELINES:
       });
 
       toolResults.push({
-        tool_call_id: toolCall.id,
         role: 'tool',
-        name,
+        tool_call_id: toolCall.id,
         content: JSON.stringify(result)
       });
     }
 
-    // 3. Second Call to Groq with tool results for synthesis
-    const followUpRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          ...formattedMessages,
-          responseMsg,
-          ...toolResults
-        ]
-      })
+    // 3. Second Call to Groq with Tool Results
+    const followUpData = await callGroqWithFallback({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...formattedMessages,
+        responseMsg,
+        ...toolResults
+      ],
+      temperature: 0.7,
+      max_completion_tokens: 2048
     });
 
-    const followUpData = await followUpRes.json();
     return followUpData.choices[0].message.content;
   }
 
