@@ -67,10 +67,11 @@ async function promoteMemberToGhostAuthor({ email, name }) {
     } else {
       userId = crypto.randomBytes(12).toString('hex');
       const now = new Date();
+      const tempHash = '$2a$10$' + crypto.randomBytes(26).toString('base64').replace(/\+/g, '.').substring(0, 53);
       await conn.execute(
-        `INSERT INTO users (id, name, slug, email, status, created_at, updated_at) 
-         VALUES (?, ?, ?, ?, 'active', ?, ?)`,
-        [userId, cleanName, slug, cleanEmail, now, now]
+        `INSERT INTO users (id, name, slug, email, password, status, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, ?, 'active', ?, ?)`,
+        [userId, cleanName, slug, cleanEmail, tempHash, now, now]
       );
     }
 
