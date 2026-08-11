@@ -1,9 +1,45 @@
 /**
  * Lokha Pay - Universal Micro-Payment & Creator Tipping Widget
- * Provides seamless 1-click tipping & micro-royalties without exposing raw crypto wallets.
+ * Connects directly to Live Creem.io (Apple Pay / Google Pay / Card) and Base Web3.
  */
 (function() {
   const PG_API_BASE = window.LOKHA_PG_URL || 'https://lokha-agent-dashboard-production.up.railway.app';
+
+  const CREEM_TIP_PRODUCTS = {
+    100: 'https://creem.io/product/prod_3hidyZZUWjLx8UuhAnC90J',
+    300: 'https://creem.io/product/prod_1BjW1YBdVzoabtLT1xrts8',
+    500: 'https://creem.io/product/prod_4xUgDuL8KwCrddBtbUf8O3',
+    1000: 'https://creem.io/product/prod_3PNIbBuy0aX0STFmQqX6Rr'
+  };
+
+  // 1. Check for Tip Success Return
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('tip_paid') === 'true') {
+    showTipThankYouToast();
+    const cleanUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, document.title, cleanUrl);
+  }
+
+  function showTipThankYouToast() {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 999999;
+      background: #065F46; color: #FFFFFF; border: 2px solid #044E39;
+      border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      font-family: -apple-system, sans-serif; display: flex; align-items: center; gap: 1rem;
+      animation: slide-up 0.3s ease-out;
+    `;
+    toast.innerHTML = `
+      <span style="font-size: 1.8rem;">✨</span>
+      <div>
+        <strong style="font-size: 1rem; display: block;">Thank You for Supporting the Author!</strong>
+        <span style="font-size: 0.85rem; opacity: 0.9;">Your micro-royalty payment has been settled to the author via Lokha PG.</span>
+      </div>
+      <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #FFF; font-size: 1.5rem; cursor: pointer; margin-left: 0.5rem;">&times;</button>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 8000);
+  }
 
   function initLokhaPay() {
     // Inject Lokha Pay Styles if not present
@@ -95,7 +131,7 @@
           background: #FFFDF9;
           border: 2.5px solid #C5A059;
           border-radius: 16px;
-          width: min(100%, 420px);
+          width: min(100%, 440px);
           padding: 2rem;
           box-shadow: 0 12px 32px rgba(0,0,0,0.25);
           position: relative;
@@ -137,25 +173,34 @@
           Send value-for-value micro-royalties directly through the Lokha settlement network. 85% goes directly to the author.
         </p>
 
+        <div style="font-size: 0.78rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.4rem;">Select Tip Amount</div>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1.25rem;">
-          <button class="lokha-pay-chip amount-opt" data-cents="10">$0.10</button>
-          <button class="lokha-pay-chip amount-opt" data-cents="50" style="border-color: #065F46; background: #ECFDF5; color: #065F46;">$0.50</button>
-          <button class="lokha-pay-chip amount-opt" data-cents="100">$1.00</button>
+          <button class="lokha-pay-chip amount-opt" data-cents="100" style="border-color: #065F46; background: #ECFDF5; color: #065F46;">$1.00</button>
+          <button class="lokha-pay-chip amount-opt" data-cents="300">$3.00</button>
           <button class="lokha-pay-chip amount-opt" data-cents="500">$5.00</button>
+          <button class="lokha-pay-chip amount-opt" data-cents="1000">$10.00</button>
         </div>
 
         <div style="margin-bottom: 1.25rem;">
           <label style="font-size: 0.78rem; font-weight: 700; color: #4B5563; text-transform: uppercase;">Payment Rail</label>
           <select id="lokha-pay-rail" style="width: 100%; border: 1.5px solid #D1D5DB; border-radius: 8px; padding: 0.6rem; font-size: 0.9rem; font-weight: 600; margin-top: 0.35rem; background: #FFF;">
-            <option value="card">💳 Card / Apple Pay (via Creem)</option>
+            <option value="card">💳 Card / Apple Pay (Live Creem MoR)</option>
             <option value="base">⚡ Base / USDC Crypto Stream</option>
-            <option value="balance">💎 Lokha Reader Balance</option>
           </select>
         </div>
 
         <button id="btn-execute-lokha-pay" class="lokha-pay-main-btn" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 1rem;">
-          <span>⚡</span> Pay $0.50 with Lokha Pay
+          <span>⚡</span> Pay $1.00 with Lokha Pay &rarr;
         </button>
+
+        <div id="crypto-qr-container" style="display: none; margin-top: 1rem; padding: 1rem; background: #F3F4F6; border-radius: 8px; font-size: 0.82rem; text-align: center;">
+          <p style="font-weight: 700; color: #111827; margin-bottom: 0.35rem;">Base Network (USDC / ETH)</p>
+          <p style="color: #4B5563; margin-bottom: 0.5rem;">Send on Base to Lokha PG Settlement Treasury:</p>
+          <code style="background: #FFF; border: 1px solid #D1D5DB; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; word-break: break-all; display: block; margin-bottom: 0.75rem;">0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7</code>
+          <button id="btn-crypto-web3-connect" style="background: #0052FF; color: #FFF; border: none; border-radius: 6px; padding: 0.5rem 1rem; font-weight: 700; cursor: pointer;">
+            🔵 Connect Web3 Wallet
+          </button>
+        </div>
 
         <div id="lokha-pay-result" style="display: none; margin-top: 1rem; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; text-align: center;"></div>
       </div>
@@ -163,7 +208,7 @@
 
     document.body.appendChild(modalOverlay);
 
-    let selectedCents = 50;
+    let selectedCents = 100;
 
     modalOverlay.querySelectorAll('.amount-opt').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -176,8 +221,21 @@
         btn.style.borderColor = '#065F46';
         btn.style.color = '#065F46';
         selectedCents = Number(btn.getAttribute('data-cents'));
-        document.getElementById('btn-execute-lokha-pay').innerHTML = `<span>⚡</span> Pay $${(selectedCents/100).toFixed(2)} with Lokha Pay`;
+        document.getElementById('btn-execute-lokha-pay').innerHTML = `<span>⚡</span> Pay $${(selectedCents/100).toFixed(2)} with Lokha Pay &rarr;`;
       });
+    });
+
+    const railSelect = document.getElementById('lokha-pay-rail');
+    const cryptoContainer = document.getElementById('crypto-qr-container');
+
+    railSelect.addEventListener('change', () => {
+      if (railSelect.value === 'base') {
+        cryptoContainer.style.display = 'block';
+        document.getElementById('btn-execute-lokha-pay').innerHTML = `<span>⚡</span> Send $${(selectedCents/100).toFixed(2)} on Base`;
+      } else {
+        cryptoContainer.style.display = 'none';
+        document.getElementById('btn-execute-lokha-pay').innerHTML = `<span>⚡</span> Pay $${(selectedCents/100).toFixed(2)} with Lokha Pay &rarr;`;
+      }
     });
 
     document.getElementById('lokha-modal-close').addEventListener('click', () => modalOverlay.remove());
@@ -185,45 +243,52 @@
       if (e.target === modalOverlay) modalOverlay.remove();
     });
 
+    // Execute Payment Action
     document.getElementById('btn-execute-lokha-pay').addEventListener('click', async () => {
-      const rail = document.getElementById('lokha-pay-rail').value;
+      const rail = railSelect.value;
       const resBox = document.getElementById('lokha-pay-result');
       const actionBtn = document.getElementById('btn-execute-lokha-pay');
 
-      actionBtn.disabled = true;
-      actionBtn.innerHTML = '⏳ Processing with Lokha Gateway...';
+      if (rail === 'card') {
+        actionBtn.disabled = true;
+        actionBtn.innerHTML = '🔒 Opening Live Creem Checkout...';
 
-      try {
-        const res = await fetch(`${PG_API_BASE}/api/pay/settle`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            authorId,
-            amountCents: selectedCents,
-            rail,
-            paymentRef: 'client_pay_' + Date.now().toString(36)
-          })
-        });
+        const directUrl = CREEM_TIP_PRODUCTS[selectedCents] || CREEM_TIP_PRODUCTS[100];
+        // Redirect reader to Real Live Creem Checkout
+        window.location.href = directUrl;
+        return;
+      }
 
-        const data = await res.json();
-        if (res.ok && data.success) {
-          resBox.style.display = 'block';
-          resBox.style.background = '#D1FAE5';
-          resBox.style.color = '#065F46';
-          resBox.style.border = '1.5px solid #10B981';
-          resBox.innerHTML = `<strong>✨ Thank you!</strong><br/>Your support of $${(selectedCents/100).toFixed(2)} was sent directly to ${authorName} via Lokha Pay!`;
-          actionBtn.style.display = 'none';
+      if (rail === 'base') {
+        if (typeof window.ethereum !== 'undefined') {
+          try {
+            actionBtn.innerHTML = '🦊 Requesting Web3 Approval...';
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            if (accounts && accounts.length > 0) {
+              const txHash = await window.ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [{
+                  from: accounts[0],
+                  to: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
+                  value: '0x38D7EA4C68000' // ~0.001 ETH
+                }]
+              });
+              resBox.style.display = 'block';
+              resBox.style.background = '#D1FAE5';
+              resBox.style.color = '#065F46';
+              resBox.innerHTML = `<strong>✨ Web3 Transaction Broadcast!</strong><br/>Tx: ${txHash.slice(0, 10)}...`;
+              actionBtn.style.display = 'none';
+            }
+          } catch(err) {
+            resBox.style.display = 'block';
+            resBox.style.background = '#FEE2E2';
+            resBox.style.color = '#991B1B';
+            resBox.innerHTML = `⚠️ Wallet Rejected: ${err.message}`;
+            actionBtn.innerHTML = `<span>⚡</span> Send $${(selectedCents/100).toFixed(2)} on Base`;
+          }
         } else {
-          throw new Error(data.error || 'Payment failed');
+          alert('No Web3 wallet detected. Please scan the QR code / deposit address above on Base.');
         }
-      } catch (err) {
-        resBox.style.display = 'block';
-        resBox.style.background = '#FEE2E2';
-        resBox.style.color = '#991B1B';
-        resBox.style.border = '1.5px solid #EF4444';
-        resBox.innerHTML = `⚠️ ${err.message}`;
-        actionBtn.disabled = false;
-        actionBtn.innerHTML = `<span>⚡</span> Pay $${(selectedCents/100).toFixed(2)} with Lokha Pay`;
       }
     });
   }
