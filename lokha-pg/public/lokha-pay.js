@@ -424,7 +424,7 @@
                 method: 'eth_sendTransaction',
                 params: [{
                   from: accounts[0],
-                  to: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
+                  to: '0xDEEf44973ae78F4bFaC5f86B6F89F6b5fA200F18',
                   value: '0x38D7EA4C68000'
                 }]
               });

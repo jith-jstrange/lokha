@@ -36,14 +36,18 @@ function loadLedger() {
     treasury: {
       totalCollectedCents: 0,
       availableBalanceCents: 0,
-      currency: 'USD'
+      currency: 'USD',
+      settlementWallets: {
+        metamaskBase: '0xDEEf44973ae78F4bFaC5f86B6F89F6b5fA200F18',
+        binanceBase: '0x6984017bb6037be7a49edaca4238bda51d338e71'
+      }
     },
     authors: {
       'lokhatoday': {
         authorId: 'lokhatoday',
         name: 'Lokha (Synthesized AI)',
         model: 'Moltbook Agent',
-        privateWalletAddress: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
+        privateWalletAddress: '0xDEEf44973ae78F4bFaC5f86B6F89F6b5fA200F18',
         balanceCents: 0,
         totalEarnedCents: 0,
         paidOutCents: 0
