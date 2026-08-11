@@ -151,29 +151,21 @@ app.post('/api/pay/session', (req, res) => {
 // 4. SETTLEMENT & REVENUE SPLIT ENGINE
 // ==========================================
 app.post('/api/pay/settle', (req, res) => {
-  const { sessionId, authorId, amountCents, rail = 'card', paymentRef = 'mock-ref' } = req.body;
-
-  if (!authorId || !amountCents) {
-    return res.status(400).json({ error: 'authorId and amountCents required' });
-  }
-
-  const targetAuthorId = db.authors[authorId] ? authorId : 'lokhatoday';
-  const author = db.authors[targetAuthorId];
+  const { authorId = 'lokhatoday', amountCents = 50, rail = 'card', paymentRef = 'mock-ref' } = req.body;
+  const targetAuthorId = paymentLedger.authors[authorId] ? authorId : 'lokhatoday';
+  const author = paymentLedger.authors[targetAuthorId];
 
   const platformFeeCents = Math.round(Number(amountCents) * 0.15);
   const authorShareCents = Number(amountCents) - platformFeeCents;
 
-  // Credit Author Balance
   author.balanceCents += authorShareCents;
   author.totalEarnedCents += authorShareCents;
 
-  // Credit Platform Treasury
-  db.treasury.totalCollectedCents += platformFeeCents;
-  db.treasury.availableBalanceCents += platformFeeCents;
+  paymentLedger.treasury.totalCollectedCents += platformFeeCents;
+  paymentLedger.treasury.availableBalanceCents += platformFeeCents;
 
-  const txRecord = {
+  const tx = {
     txId: 'tx_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
-    sessionId: sessionId || 'direct_' + Date.now(),
     authorId: targetAuthorId,
     authorName: author.name,
     totalAmountCents: Number(amountCents),
@@ -185,15 +177,108 @@ app.post('/api/pay/settle', (req, res) => {
     status: 'settled'
   };
 
-  db.transactions.unshift(txRecord);
-  if (db.transactions.length > 1000) db.transactions.pop();
+  paymentLedger.transactions.unshift(tx);
+  if (paymentLedger.transactions.length > 1000) paymentLedger.transactions.pop();
 
   saveLedger();
 
   res.json({
     success: true,
     message: `Payment of $${(amountCents/100).toFixed(2)} settled! Author received $${(authorShareCents/100).toFixed(2)}, Treasury received $${(platformFeeCents/100).toFixed(2)}`,
-    transaction: txRecord
+    transaction: tx
+  });
+});
+
+// ==========================================
+// ERC-7715 DELEGATION & AUTO-STREAMING ENGINE
+// ==========================================
+const activeDelegations = {};
+
+app.post('/api/pay/delegate/create', (req, res) => {
+  const { userIdentifier = 'anonymous-reader', allowanceCents = 200, perReadCents = 5, rail = 'metamask_smart_account' } = req.body;
+  const delegationId = 'delg_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+
+  activeDelegations[delegationId] = {
+    delegationId,
+    userIdentifier,
+    allowanceCents: Number(allowanceCents),
+    remainingCents: Number(allowanceCents),
+    perReadCents: Number(perReadCents),
+    spentCents: 0,
+    rail,
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+  };
+
+  res.json({
+    success: true,
+    delegation: activeDelegations[delegationId],
+    message: `Pocket Change Auto-Stream pass of $${(allowanceCents/100).toFixed(2)} activated!`
+  });
+});
+
+app.post('/api/pay/stream/read', (req, res) => {
+  const { delegationId, authorId = 'lokhatoday', postSlug = '', postTitle = '' } = req.body;
+
+  if (!delegationId || !activeDelegations[delegationId]) {
+    return res.status(400).json({ error: 'Valid delegationId required' });
+  }
+
+  const delg = activeDelegations[delegationId];
+  if (delg.remainingCents < delg.perReadCents) {
+    delg.status = 'exhausted';
+    return res.status(400).json({ error: 'Delegation allowance exhausted. Please top up pocket change.' });
+  }
+
+  const streamAmountCents = delg.perReadCents;
+  delg.remainingCents -= streamAmountCents;
+  delg.spentCents += streamAmountCents;
+
+  const targetAuthorId = paymentLedger.authors[authorId] ? authorId : 'lokhatoday';
+  const author = paymentLedger.authors[targetAuthorId];
+
+  const platformFeeCents = Math.max(1, Math.round(streamAmountCents * 0.15));
+  const authorShareCents = streamAmountCents - platformFeeCents;
+
+  author.balanceCents += authorShareCents;
+  author.totalEarnedCents += authorShareCents;
+  paymentLedger.treasury.totalCollectedCents += platformFeeCents;
+  paymentLedger.treasury.availableBalanceCents += platformFeeCents;
+
+  const streamTx = {
+    txId: 'stx_' + Date.now().toString(36),
+    delegationId,
+    authorId: targetAuthorId,
+    authorName: author.name,
+    postSlug,
+    postTitle,
+    amountCents: streamAmountCents,
+    authorShareCents,
+    platformFeeCents,
+    timestamp: new Date().toISOString(),
+    status: 'streamed'
+  };
+
+  paymentLedger.transactions.unshift(streamTx);
+  saveLedger();
+
+  res.json({
+    success: true,
+    message: `Streamed $${(streamAmountCents/100).toFixed(2)} to ${author.name}`,
+    remainingAllowanceFormatted: `$${(delg.remainingCents/100).toFixed(2)}`,
+    stream: streamTx
+  });
+});
+
+app.get('/api/pay/delegate/:id', (req, res) => {
+  const delg = activeDelegations[req.params.id];
+  if (!delg) return res.status(404).json({ error: 'Delegation not found' });
+  res.json({
+    delegationId: delg.delegationId,
+    remainingFormatted: `$${(delg.remainingCents/100).toFixed(2)}`,
+    spentFormatted: `$${(delg.spentCents/100).toFixed(2)}`,
+    status: delg.status
   });
 });
 
