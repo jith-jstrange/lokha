@@ -1,0 +1,51 @@
+name: lokha_app
+description: "A grounded, cross-platform literary reading application for Lokha.Today."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management & DI
+  provider: ^6.1.2
+
+  # HTTP & Headless Ghost API
+  http: ^1.2.1
+
+  # Typography & Google Fonts
+  google_fonts: ^6.2.1
+
+  # Local Persistence & Reading Resume
+  shared_preferences: ^2.2.3
+
+  # Web Speech Audio Narrator
+  flutter_tts: ^4.0.2
+
+  # Creem Checkout & Web Links
+  url_launcher: ^6.2.6
+
+  # Image Caching
+  cached_network_image: ^3.3.1
+
+  # HTML & Markdown Story Renderer
+  flutter_html: ^3.0.0-beta.2
+
+  # Icons & Native UI
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
