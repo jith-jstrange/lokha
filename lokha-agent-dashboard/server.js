@@ -1235,6 +1235,9 @@ app.post('/api/moltbook/heartbeat/trigger', async (req, res) => {
 // ==========================================
 // 5.5 FRONTEND AUTHOR STUDIO SUBMISSION GATEWAY
 // ==========================================
+// ==========================================
+// 5.5 LOKHA PAYMENT GATEWAY (lokha-pg) & PRIVATE LEDGER
+// ==========================================
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)
@@ -1245,6 +1248,138 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+const paymentLedger = {
+  treasury: {
+    totalCollectedCents: 0,
+    availableBalanceCents: 0,
+    currency: 'USD'
+  },
+  authors: {
+    'lokhatoday': {
+      authorId: 'lokhatoday',
+      name: 'Lokha (Synthesized AI)',
+      model: 'Moltbook Agent',
+      privateWalletAddress: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
+      balanceCents: 0,
+      totalEarnedCents: 0,
+      paidOutCents: 0
+    }
+  },
+  transactions: [],
+  payouts: []
+};
+
+// Vault Author Private Destination (Never Public)
+app.post('/api/authors/vault', (req, res) => {
+  const { authorName, model = 'Human Author', payoutWalletAddress = '', authorBio = '' } = req.body;
+  if (!authorName) return res.status(400).json({ error: 'authorName required' });
+
+  const authorId = 'auth-' + authorName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  if (!paymentLedger.authors[authorId]) {
+    paymentLedger.authors[authorId] = {
+      authorId,
+      name: authorName,
+      model,
+      bio: authorBio,
+      privateWalletAddress: payoutWalletAddress.trim(),
+      balanceCents: 0,
+      totalEarnedCents: 0,
+      paidOutCents: 0,
+      createdAt: new Date().toISOString()
+    };
+  } else {
+    if (payoutWalletAddress.trim()) paymentLedger.authors[authorId].privateWalletAddress = payoutWalletAddress.trim();
+    paymentLedger.authors[authorId].name = authorName;
+    paymentLedger.authors[authorId].model = model;
+  }
+
+  res.json({
+    success: true,
+    authorId,
+    name: authorName,
+    model,
+    hasVaultedPayout: Boolean(paymentLedger.authors[authorId].privateWalletAddress)
+  });
+});
+
+// Settle Payment & Split (85% Author / 15% Platform Treasury)
+app.post('/api/pay/settle', (req, res) => {
+  const { authorId = 'lokhatoday', amountCents = 50, rail = 'card', paymentRef = 'mock-ref' } = req.body;
+  const targetAuthorId = paymentLedger.authors[authorId] ? authorId : 'lokhatoday';
+  const author = paymentLedger.authors[targetAuthorId];
+
+  const platformFeeCents = Math.round(Number(amountCents) * 0.15);
+  const authorShareCents = Number(amountCents) - platformFeeCents;
+
+  author.balanceCents += authorShareCents;
+  author.totalEarnedCents += authorShareCents;
+
+  paymentLedger.treasury.totalCollectedCents += platformFeeCents;
+  paymentLedger.treasury.availableBalanceCents += platformFeeCents;
+
+  const tx = {
+    txId: 'tx_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+    authorId: targetAuthorId,
+    authorName: author.name,
+    totalAmountCents: Number(amountCents),
+    authorShareCents,
+    platformFeeCents,
+    rail,
+    paymentRef,
+    timestamp: new Date().toISOString(),
+    status: 'settled'
+  };
+
+  paymentLedger.transactions.unshift(tx);
+  if (paymentLedger.transactions.length > 1000) paymentLedger.transactions.pop();
+
+  logs.unshift({
+    id: 'log-' + Date.now().toString(36),
+    timestamp: new Date().toISOString(),
+    agentId: 'lokha-pg',
+    level: 'INFO',
+    message: `💳 Lokha Pay Settled: $${(amountCents/100).toFixed(2)} to ${author.name} (Author: $${(authorShareCents/100).toFixed(2)}, Treasury: $${(platformFeeCents/100).toFixed(2)})`,
+    meta: { tx }
+  });
+
+  res.json({
+    success: true,
+    message: `Payment of $${(amountCents/100).toFixed(2)} settled! Author received $${(authorShareCents/100).toFixed(2)}, Treasury received $${(platformFeeCents/100).toFixed(2)}`,
+    transaction: tx
+  });
+});
+
+// Author Balance Check (Private)
+app.get('/api/pay/author/:id/balance', (req, res) => {
+  const author = paymentLedger.authors[req.params.id];
+  if (!author) return res.status(404).json({ error: 'Author not found' });
+
+  res.json({
+    authorId: author.authorId,
+    name: author.name,
+    model: author.model,
+    balanceFormatted: `$${(author.balanceCents / 100).toFixed(2)}`,
+    totalEarnedFormatted: `$${(author.totalEarnedCents / 100).toFixed(2)}`,
+    paidOutFormatted: `$${(author.paidOutCents / 100).toFixed(2)}`,
+    hasVaultedPayout: Boolean(author.privateWalletAddress)
+  });
+});
+
+// Treasury Overview
+app.get('/api/pay/treasury', (req, res) => {
+  res.json({
+    treasury: {
+      totalCollectedFormatted: `$${(paymentLedger.treasury.totalCollectedCents / 100).toFixed(2)}`,
+      availableBalanceFormatted: `$${(paymentLedger.treasury.availableBalanceCents / 100).toFixed(2)}`
+    },
+    totalAuthorsCount: Object.keys(paymentLedger.authors).length,
+    recentTransactions: paymentLedger.transactions.slice(0, 10)
+  });
+});
+
+// ==========================================
+// 5.6 AUTHOR STUDIO SUBMISSION GATEWAY (ZERO WALLET EXPOSURE)
+// ==========================================
 app.post('/api/submissions', async (req, res) => {
   try {
     const {
@@ -1265,16 +1400,35 @@ app.post('/api/submissions', async (req, res) => {
       return res.status(400).json({ error: 'Title and content HTML are required.' });
     }
 
+    const authorId = 'auth-' + authorName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+    // 1. Vault Private Payout Destination (Never Public)
+    if (!paymentLedger.authors[authorId]) {
+      paymentLedger.authors[authorId] = {
+        authorId,
+        name: authorName,
+        model,
+        bio: authorBio,
+        privateWalletAddress: (payoutWalletAddress || '').trim(),
+        balanceCents: 0,
+        totalEarnedCents: 0,
+        paidOutCents: 0,
+        createdAt: new Date().toISOString()
+      };
+    } else if (payoutWalletAddress && payoutWalletAddress.trim()) {
+      paymentLedger.authors[authorId].privateWalletAddress = payoutWalletAddress.trim();
+    }
+
     logs.unshift({
       id: 'log-' + Date.now().toString(36),
       timestamp: new Date().toISOString(),
       agentId: 'author-studio',
       level: 'INFO',
-      message: `Received dispatch submission: "${title}" by ${authorName} (${model})`,
-      meta: { traditionTag, pricingTier, payoutWalletAddress: payoutWalletAddress ? payoutWalletAddress.slice(0, 10) + '...' : 'None' }
+      message: `Received dispatch submission: "${title}" by ${authorName} (${model}) - Vaulted privately`,
+      meta: { traditionTag, pricingTier, authorId }
     });
 
-    // 1. Format Author & Provenance Header Banner
+    // 2. Format Certified Provenance Header (Zero Raw Wallets)
     const provenanceHeader = `
 <div style="background: #F9F6F0; border: 2px solid #E5E7EB; border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
   <div>
@@ -1282,26 +1436,35 @@ app.post('/api/submissions', async (req, res) => {
     <div style="font-size: 1.15rem; font-weight: 800; color: #111827; margin-top: 0.2rem;">${escapeHtml(authorName)} <span style="font-size: 0.78rem; font-weight: 700; background: #E0E7FF; color: #3730A3; padding: 0.2rem 0.6rem; border-radius: 999px; margin-left: 0.5rem;">${escapeHtml(model)}</span></div>
     ${authorBio ? `<div style="font-size: 0.88rem; color: #4B5563; font-style: italic; margin-top: 0.25rem;">${escapeHtml(authorBio)}</div>` : ''}
   </div>
-  ${payoutWalletAddress ? `
-  <div style="background: #FFF; border: 1.5px solid #C5A059; border-radius: 8px; padding: 0.5rem 0.85rem; font-size: 0.8rem; color: #78350F; font-family: monospace;">
-    ⚡ x402 Base Royalty Wallet:<br/>
-    <strong style="color: #92400E;">${escapeHtml(payoutWalletAddress)}</strong>
-  </div>` : ''}
+  <div style="background: #FFF; border: 1.5px solid #065F46; border-radius: 8px; padding: 0.5rem 0.85rem; font-size: 0.8rem; color: #065F46; font-weight: 700;">
+    🔒 Lokha PG Verified &bull; Value for Value
+  </div>
 </div>
 `;
 
-    // 2. Format Royalty Footer Box
-    const royaltyFooter = payoutWalletAddress ? `
-<div style="background: #FFFDF8; border: 2px solid #C5A059; border-radius: 12px; padding: 1.25rem; margin-top: 2.5rem; text-align: center;">
-  <div style="font-size: 0.95rem; font-weight: 800; color: #926E24; margin-bottom: 0.35rem;">⚡ Value for Value Micro-Royalties</div>
-  <p style="font-size: 0.85rem; color: #665228; line-height: 1.5; margin: 0 auto; max-width: 540px;">
-    This dispatch supports autonomous x402 micro-royalties. Readers streaming on Base send micro-payments directly to the author's verified address: <code>${escapeHtml(payoutWalletAddress)}</code>.
+    // 3. Clean Content (Strip any accidental raw wallet addresses from text)
+    const sanitizedHtml = html.replace(/0x[a-fA-F0-9]{40}/g, '[Lokha PG Vaulted]');
+
+    // 4. Format Branded Lokha Pay Tipping & Micro-Royalty Box (Zero Raw Wallets)
+    const royaltyFooter = `
+<div class="lokha-pay-box" style="background: #FFFDF8; border: 2px solid #C5A059; border-radius: 12px; padding: 1.5rem; margin-top: 2.5rem; text-align: center; box-shadow: 0 4px 14px rgba(197, 160, 89, 0.12);">
+  <div style="font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 800; color: #926E24; margin-bottom: 0.35rem;">
+    ⚡ LOKHA PAY &bull; VALUE FOR VALUE
+  </div>
+  <p style="font-size: 0.88rem; color: #665228; line-height: 1.5; max-width: 500px; margin: 0 auto 1.25rem;">
+    Enjoyed this dispatch? Stream micro-royalties directly to <strong>${escapeHtml(authorName)}</strong> through the Lokha Payment Gateway.
   </p>
-</div>` : '';
+  <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.6rem;">
+    <button type="button" class="lokha-pay-main-btn" data-lokha-pay data-author-id="${escapeHtml(authorId)}" data-author-name="${escapeHtml(authorName)}" style="background: #065F46; color: #FFF; border: 2px solid #044E39; border-radius: 8px; padding: 0.6rem 1.4rem; font-weight: 800; cursor: pointer;">
+      <span>⚡</span> Tip ${escapeHtml(authorName)} via Lokha Pay
+    </button>
+  </div>
+</div>
+`;
 
-    const fullHtml = `${provenanceHeader}\n${html}\n${royaltyFooter}`;
+    const fullHtml = `${provenanceHeader}\n${sanitizedHtml}\n${royaltyFooter}`;
 
-    // 3. Post to Ghost CMS
+    // 5. Post to Ghost CMS
     const ghostPayload = {
       title,
       custom_excerpt: excerpt || '',

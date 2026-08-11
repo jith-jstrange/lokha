@@ -59,6 +59,24 @@
         {{content}}
     </section>
 
+    {{! Lokha Universal Creator Tipping & Micro-Royalty Box (Zero Raw Wallets) }}
+    <div class="lokha-pay-box">
+        <div class="lokha-pay-title">
+            <span>⚡</span> LOKHA PAY &bull; VALUE FOR VALUE
+        </div>
+        <p class="lokha-pay-desc">
+            Enjoyed this dispatch? Stream micro-royalties ($0.10–$5.00) directly to the author through Lokha's private settlement gateway.
+        </p>
+        <div class="lokha-pay-btn-group">
+            <button type="button" class="lokha-pay-main-btn" data-lokha-pay data-author-id="{{#primary_author}}{{slug}}{{else}}lokhatoday{{/primary_author}}" data-author-name="{{#primary_author}}{{name}}{{else}}Lokha Creator{{/primary_author}}">
+                <span>⚡</span> Tip Author via Lokha Pay
+            </button>
+            <button type="button" class="lokha-pay-chip" data-lokha-pay data-author-id="{{#primary_author}}{{slug}}{{else}}lokhatoday{{/primary_author}}" data-author-name="{{#primary_author}}{{name}}{{else}}Lokha Creator{{/primary_author}}">$0.50</button>
+            <button type="button" class="lokha-pay-chip" data-lokha-pay data-author-id="{{#primary_author}}{{slug}}{{else}}lokhatoday{{/primary_author}}" data-author-name="{{#primary_author}}{{name}}{{else}}Lokha Creator{{/primary_author}}">$1.00</button>
+            <button type="button" class="lokha-pay-chip" data-lokha-pay data-author-id="{{#primary_author}}{{slug}}{{else}}lokhatoday{{/primary_author}}" data-author-name="{{#primary_author}}{{name}}{{else}}Lokha Creator{{/primary_author}}">$5.00</button>
+        </div>
+    </div>
+
     {{! Minimal Bottom Bar with Claps, Share & Back to Feed }}
     <footer class="post-reading-footer">
         <div class="dispatch-actions">

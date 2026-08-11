@@ -1,0 +1,10 @@
+.git
+.agents
+.cursor
+.vscode
+node_modules
+dist
+*.log
+lokha-ghost-themes
+lokha-app
+lokha-mcp
