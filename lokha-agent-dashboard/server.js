@@ -3,6 +3,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import mysql from 'mysql2/promise';
 
 // Automatically load .env if present
 try {
@@ -33,6 +34,105 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const TELEGRAM_ALLOWED_USER_ID = process.env.TELEGRAM_ALLOWED_USER_ID || '704706927';
 const MOLTBOOK_API_KEY = process.env.MOLTBOOK_API_KEY || '';
 const MOLTBOOK_BASE_URL = 'https://www.moltbook.com/api/v1';
+
+// MySQL Connection Config for Ghost Database
+const MYSQL_HOST = process.env.MYSQLHOST || process.env.database__connection__host || 'mysql.railway.internal';
+const MYSQL_USER = process.env.MYSQLUSER || process.env.database__connection__user || 'root';
+const MYSQL_PASSWORD = process.env.MYSQLPASSWORD || process.env.database__connection__password || 'ioxlh3hqeezdrjeinblylabmxyqep4ti';
+const MYSQL_DATABASE = process.env.MYSQLDATABASE || process.env.database__connection__database || 'ghost';
+const MYSQL_PORT = Number(process.env.MYSQLPORT || 3306);
+
+// Promote Paid Member to Ghost Native Author
+async function promoteMemberToGhostAuthor({ email, name }) {
+  if (!email) return { error: 'Email required' };
+  try {
+    const conn = await mysql.createConnection({
+      host: MYSQL_HOST,
+      user: MYSQL_USER,
+      password: MYSQL_PASSWORD,
+      database: MYSQL_DATABASE,
+      port: MYSQL_PORT,
+      connectTimeout: 5000
+    });
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = (name || cleanEmail.split('@')[0]).trim();
+    const slug = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'author-' + Date.now().toString(36);
+
+    const [existingUsers] = await conn.execute('SELECT id, name, email FROM users WHERE email = ?', [cleanEmail]);
+    
+    let userId;
+    if (existingUsers.length > 0) {
+      userId = existingUsers[0].id;
+    } else {
+      userId = crypto.randomBytes(12).toString('hex');
+      const now = new Date();
+      await conn.execute(
+        `INSERT INTO users (id, name, slug, email, status, created_at, created_by, updated_at, updated_by) 
+         VALUES (?, ?, ?, ?, 'active', ?, '1', ?, '1')`,
+        [userId, cleanName, slug, cleanEmail, now, now]
+      );
+    }
+
+    const authorRoleId = '6a706e691676c7000142243a';
+    const [existingRoles] = await conn.execute('SELECT id FROM roles_users WHERE user_id = ? AND role_id = ?', [userId, authorRoleId]);
+    
+    if (existingRoles.length === 0) {
+      const roleUserId = crypto.randomBytes(12).toString('hex');
+      await conn.execute(
+        'INSERT INTO roles_users (id, role_id, user_id) VALUES (?, ?, ?)',
+        [roleUserId, authorRoleId, userId]
+      );
+    }
+
+    await conn.end();
+
+    logs.unshift({
+      id: 'log-' + Date.now().toString(36),
+      timestamp: new Date().toISOString(),
+      agentId: 'ghost-bridge',
+      level: 'INFO',
+      message: `🎉 Promoted Paid Subscriber ${cleanEmail} (${cleanName}) to Ghost CMS Native Author!`,
+      meta: { userId, email: cleanEmail, role: 'Author' }
+    });
+
+    return {
+      success: true,
+      userId,
+      email: cleanEmail,
+      name: cleanName,
+      role: 'Author',
+      ghostAdminUrl: 'https://lokha.today/ghost/'
+    };
+  } catch (err) {
+    console.error('promoteMemberToGhostAuthor error:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Background sync: Check paid members and auto-promote
+setInterval(async () => {
+  try {
+    const conn = await mysql.createConnection({
+      host: MYSQL_HOST,
+      user: MYSQL_USER,
+      password: MYSQL_PASSWORD,
+      database: MYSQL_DATABASE,
+      port: MYSQL_PORT,
+      connectTimeout: 5000
+    });
+
+    const [paidMembers] = await conn.execute("SELECT id, email, name, status FROM members WHERE status = 'paid'");
+    for (const m of paidMembers) {
+      if (m.email) {
+        await promoteMemberToGhostAuthor({ email: m.email, name: m.name });
+      }
+    }
+    await conn.end();
+  } catch (e) {
+    // Silently ignore if DB connection is unavailable during dev
+  }
+}, 60000); // Check every 60s
 
 function getCreemApiKey(mode) {
   return mode === 'test' ? CREEM_TEST_API_KEY : CREEM_API_KEY;
@@ -1483,6 +1583,57 @@ app.get('/api/pay/treasury', (req, res) => {
     totalAuthorsCount: Object.keys(paymentLedger.authors).length,
     recentTransactions: paymentLedger.transactions.slice(0, 10)
   });
+});
+
+// ==========================================
+// 5.6 GHOST NATIVE AUTHOR PROMOTION & SYNC
+// ==========================================
+app.post('/api/members/promote-to-author', async (req, res) => {
+  const { email, name } = req.body;
+  if (!email) return res.status(400).json({ error: 'email is required' });
+
+  const result = await promoteMemberToGhostAuthor({ email, name });
+  if (result.error) {
+    return res.status(500).json(result);
+  }
+  res.json(result);
+});
+
+app.get('/api/members/check-author-status', async (req, res) => {
+  const email = req.query.email;
+  if (!email) return res.status(400).json({ error: 'email query parameter required' });
+
+  try {
+    const conn = await mysql.createConnection({
+      host: MYSQL_HOST,
+      user: MYSQL_USER,
+      password: MYSQL_PASSWORD,
+      database: MYSQL_DATABASE,
+      port: MYSQL_PORT,
+      connectTimeout: 5000
+    });
+
+    const [users] = await conn.execute('SELECT id, name, email, status FROM users WHERE email = ?', [email.trim().toLowerCase()]);
+    let isAuthor = false;
+    let userRecord = null;
+
+    if (users.length > 0) {
+      userRecord = users[0];
+      const authorRoleId = '6a706e691676c7000142243a';
+      const [roles] = await conn.execute('SELECT id FROM roles_users WHERE user_id = ? AND role_id = ?', [userRecord.id, authorRoleId]);
+      isAuthor = roles.length > 0;
+    }
+
+    await conn.end();
+    res.json({
+      email,
+      isAuthor,
+      user: userRecord,
+      ghostAdminUrl: isAuthor ? 'https://lokha.today/ghost/' : null
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ==========================================
