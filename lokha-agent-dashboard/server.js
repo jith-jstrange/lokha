@@ -320,29 +320,30 @@ function getAdminJWT() {
   return `${token}.${sig}`;
 }
 
-async function executeGhostPost({ title, content_html, tags = [], status = 'draft', excerpt = '' }) {
+async function executeGhostPost({ title, html, content_html, tags = [], status = 'draft', excerpt = '', custom_excerpt = '', feature_image = null }) {
   const token = getAdminJWT();
+  const postObj = {
+    title,
+    html: html || content_html || `<p>${custom_excerpt || excerpt}</p>`,
+    custom_excerpt: custom_excerpt || excerpt || '',
+    status: status || 'draft',
+    tags: tags.map(t => typeof t === 'string' ? { name: t } : t)
+  };
+  if (feature_image) postObj.feature_image = feature_image;
+
   const res = await fetch('https://lokha.today/ghost/api/admin/posts/?source=html', {
     method: 'POST',
     headers: {
       'Authorization': `Ghost ${token}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      posts: [{
-        title,
-        html: content_html || `<p>${excerpt}</p>`,
-        custom_excerpt: excerpt || '',
-        status: status || 'draft',
-        tags: tags.map(t => typeof t === 'string' ? { name: t } : t)
-      }]
-    })
+    body: JSON.stringify({ posts: [postObj] })
   });
 
   const data = await res.json();
   if (!res.ok) throw new Error(`Ghost Error: ${JSON.stringify(data.errors || data)}`);
   const post = data.posts[0];
-  return { success: true, postId: post.id, title: post.title, url: post.url, status: post.status };
+  return { success: true, postId: post.id, title: post.title, url: post.url, slug: post.slug, status: post.status };
 }
 
 async function executeBufferPost({ text, channel = 'all', imageUrl = null }) {
