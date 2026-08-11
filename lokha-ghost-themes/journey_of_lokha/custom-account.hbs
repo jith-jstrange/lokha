@@ -1,0 +1,138 @@
+{{!< default}}
+
+{{#post}}
+<div class="account-container">
+
+    {{#if @member}}
+        <header class="account-header">
+            <h1 class="account-title">My Account</h1>
+            <p class="account-subtitle">Manage your Lokha subscription, plan details, and reading preferences.</p>
+        </header>
+
+        <div class="account-card-grid">
+            {{! 1. Profile & Membership Status }}
+            <div class="account-profile-card">
+                <div class="profile-avatar-circle">
+                    {{#if @member.name}}
+                        <span>{{@member.name.[0]}}</span>
+                    {{else}}
+                        <span>✦</span>
+                    {{/if}}
+                </div>
+                <div class="profile-info">
+                    <h2 class="profile-name">{{#if @member.name}}{{@member.name}}{{else}}Lokha Reader{{/if}}</h2>
+                    <p class="profile-email">{{@member.email}}</p>
+                    
+                    <div class="profile-tier-badge {{#if @member.paid}}is-paid{{else}}is-free{{/if}}">
+                        {{#if @member.paid}}
+                            <span>✦ Supporter Member (Paid VIP)</span>
+                        {{else}}
+                            <span>Free Reader Tier</span>
+                        {{/if}}
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <a href="#/portal/account/profile" class="action-icon-btn">Edit Profile</a>
+                    <a href="#/portal/signout" class="action-icon-btn">Sign Out</a>
+                </div>
+            </div>
+
+            {{! 2. Bookmarked Reading List }}
+            <div class="sidebar-widget" id="accountBookmarksWidget">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <h3 class="widget-title" style="margin: 0;">🔖 Saved Reading List</h3>
+                    <span id="savedCountBadge" class="tag-badge">0 Stories</span>
+                </div>
+                <div id="savedReadingListContainer">
+                    <p style="color: #6B7280; font-size: 0.9rem;">You haven't bookmarked any dispatches yet. Click the bookmark icon on any story to save it here.</p>
+                </div>
+            </div>
+
+            {{! 3. Plan Details & Upgrade Options }}
+            {{#if @member.paid}}
+                <div class="sidebar-widget" style="background: #FFFDF0; border-width: 2.5px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.2rem; color: #D97706;">✦</span>
+                        <h3 class="widget-title" style="margin: 0;">Your Supporter Subscription is Active</h3>
+                    </div>
+                    <p class="widget-text">
+                        Thank you for directly backing independent, accurised writing. You have unrestricted access to all 12 traditions, deep essays, and member archives.
+                    </p>
+                    <div style="font-size: 0.8rem; color: #6B7280;">
+                        <span>Billing Provider: <strong>Creem.io Merchant of Record</strong></span>
+                    </div>
+                </div>
+            {{else}}
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">Upgrade Your Plan</h3>
+                    <p class="widget-text">
+                        Unlock full archival access, deep cultural essays, and graphic novel dispatches. Handled securely via Creem.io with instant activation.
+                    </p>
+
+                    <div class="pricing-plans-grid">
+                        {{! Monthly Plan }}
+                        <div class="plan-card">
+                            <span class="tag-badge" style="width: fit-content; margin-bottom: 0.5rem;">Monthly</span>
+                            <h4 class="plan-name">Monthly Supporter</h4>
+                            <div class="plan-price">$5<span style="font-size: 1rem; color: #6B7280;">/mo</span></div>
+                            <a href="https://creem.io/product/prod_1zIxHl2CZ7Efx4ZE3lBCNP?customer_email={{@member.email}}" class="plan-btn" target="_blank" rel="noopener">
+                                Upgrade Monthly ($5/mo) &rarr;
+                            </a>
+                        </div>
+
+                        {{! Yearly Plan }}
+                        <div class="plan-card featured-plan">
+                            <span class="staff-pick-pill" style="width: fit-content; margin-bottom: 0.5rem;">Save 17% • 2 Mo Free</span>
+                            <h4 class="plan-name">Annual Supporter</h4>
+                            <div class="plan-price">$50<span style="font-size: 1rem; color: #6B7280;">/yr</span></div>
+                            <a href="https://creem.io/product/prod_1QoaqCLA6UqaNTBH76XzqZ?customer_email={{@member.email}}" class="plan-btn" target="_blank" rel="noopener">
+                                Upgrade Annual ($50/yr) &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {{/if}}
+        </div>
+
+    {{else}}
+        {{! Not Logged In State }}
+        <div class="sidebar-widget" style="text-align: center; padding: 3rem 1.5rem;">
+            <h1 class="hub-title">Member Account</h1>
+            <p class="hub-subtitle">Sign in to your Lokha account or join as a free reader.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="#/portal/signin" class="plan-btn" style="background: #FFF; color: #000;">Sign In</a>
+                <a href="#/portal/signup" class="plan-btn">Create Free Account</a>
+            </div>
+        </div>
+    {{/if}}
+
+</div>
+
+<script>
+// Load Saved Bookmarks from LocalStorage
+document.addEventListener('DOMContentLoaded', () => {
+    const listContainer = document.getElementById('savedReadingListContainer');
+    const badge = document.getElementById('savedCountBadge');
+    try {
+        const saved = JSON.parse(localStorage.getItem('lokha_bookmarks') || '[]');
+        if (badge) badge.textContent = `${saved.length} Stories`;
+        if (listContainer && saved.length > 0) {
+            listContainer.innerHTML = saved.map(item => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #E5E7EB;">
+                    <a href="${item.url}" style="font-weight: 700; color: #111827;">${item.title}</a>
+                    <button class="action-icon-btn" onclick="removeBookmark('${item.slug}')" style="color: #DC2626;">✕</button>
+                </div>
+            `).join('');
+        }
+    } catch(e) {}
+});
+
+function removeBookmark(slug) {
+    let saved = JSON.parse(localStorage.getItem('lokha_bookmarks') || '[]');
+    saved = saved.filter(i => i.slug !== slug);
+    localStorage.setItem('lokha_bookmarks', JSON.stringify(saved));
+    location.reload();
+}
+</script>
+{{/post}}

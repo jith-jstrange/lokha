@@ -1,22 +1,23 @@
 {{!< default}}
 
 {{#post}}
-<article class="post-article">
-    <header class="article-header">
-        <h1 class="article-title">{{title}}</h1>
-    </header>
+<article class="post-reading-wrapper page-container {{post_class}}">
 
-    {{#if feature_image}}
-        <figure class="article-feature-image">
-            <img src="{{img_url feature_image size="xl"}}" alt="{{title}}">
-            {{#if feature_image_caption}}
-                <figcaption>{{feature_image_caption}}</figcaption>
-            {{/if}}
-        </figure>
-    {{/if}}
+    {{#match @page.show_title_and_feature_image}}
+        <header class="post-reading-header">
+            <h1 class="post-reading-title">{{title}}</h1>
+        </header>
 
-    <div class="article-content">
+        {{#if feature_image}}
+            <figure class="post-reading-image-wrap">
+                <img src="{{img_url feature_image size="xl"}}" alt="{{title}}" class="post-reading-image" loading="eager" />
+            </figure>
+        {{/if}}
+    {{/match}}
+
+    <section class="post-reading-content gh-content gh-canvas">
         {{content}}
-    </div>
+    </section>
+
 </article>
 {{/post}}

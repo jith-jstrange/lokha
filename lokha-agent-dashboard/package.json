@@ -1,0 +1,14 @@
+{
+  "name": "lokha-agent-dashboard",
+  "version": "1.0.1",
+  "type": "module",
+  "description": "Agent Command Center, Perpetual Memory & Real-Time Logging Dashboard for Lokha",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

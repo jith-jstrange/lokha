@@ -1,101 +1,271 @@
 <!DOCTYPE html>
 <html lang="{{@site.locale}}">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>{{meta_title}}</title>
     
-    <link rel="stylesheet" href="{{asset "css/screen.css"}}">
-    
-    {{ghost_head}}
+    {{! Modern Google Fonts }}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Charis+SIL:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 
-    {{!-- Official Ghost Portal Script for Sign In / Subscribe Integrity Tokens --}}
-    <script defer src="https://cdn.jsdelivr.net/ghost/portal@~2.40/umd/portal.min.js" data-ghost="{{@site.url}}/" data-key="b764222d2681a6642d593b1c32" crossorigin="anonymous"></script>
+    {{! Main Master Stylesheet }}
+    <link rel="stylesheet" href="{{asset "css/screen.css"}}" />
+
+    {{ghost_head}}
 </head>
 <body class="{{body_class}}">
+    <div class="site-wrapper">
 
-    {{!-- Floating Navigation Island with Perfect Mobile Alignment --}}
-    <div class="floating-nav-wrapper">
-        <header class="floating-nav-pill" role="banner">
-            <a href="{{@site.url}}" class="site-brand">
-                <div class="brand-icon">🌐</div>
-                <span>{{@site.title}}</span>
-            </a>
+        {{! Reading Progress Bar for Posts }}
+        <div id="reading-progress" class="reading-progress-bar"></div>
 
-            {{!-- Action Controls & Dropdown Menu Trigger --}}
-            <div class="nav-pill-actions">
-                <button id="menuToggleBtn" class="menu-toggle-btn" aria-label="Toggle Navigation Menu" aria-expanded="false">
-                    <span>Menu</span>
-                    <svg class="dropdown-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-
-                {{#if @member}}
-                    <a href="#/portal/account" class="btn-ghost-signin" data-portal="account">Account</a>
-                {{else}}
-                    <a href="#/portal/signup" class="btn-ghost-signup" data-portal="signup">Subscribe</a>
-                {{/if}}
-            </div>
-
-            {{!-- Floating Dropdown Popover Card --}}
-            <div id="navDropdownCard" class="nav-dropdown-card" aria-hidden="true">
-                <div class="dropdown-header">
-                    <span>Menu</span>
-                </div>
+        {{! Floating App Header }}
+        <header class="floating-nav-container">
+            <nav class="floating-nav">
                 
-                {{#if @site.navigation}}
-                    <nav class="site-nav-dropdown" role="navigation" aria-label="Dropdown Navigation">
-                        {{navigation}}
-                    </nav>
-                {{/if}}
+                {{! Brand & Wordmark }}
+                <div class="nav-left">
+                    <a href="{{@site.url}}" class="nav-logo-link">
+                        <img src="{{asset "images/lokha-logo.png"}}" alt="{{@site.title}}" class="nav-logo-emblem" />
+                        <span class="nav-brand-title">LOKHA</span>
+                    </a>
+                </div>
 
-                <div class="dropdown-footer">
-                    {{#if @member}}
-                        <a href="#/portal/account" class="dropdown-auth-link" data-portal="account">Account &rarr;</a>
+                {{! Desktop Nav Center (Zero Dots) }}
+                <div class="nav-center">
+                    {{#if @site.navigation}}
+                        {{navigation}}
                     {{else}}
-                        <a href="#/portal/signin" class="dropdown-auth-link" data-portal="signin">Sign In &rarr;</a>
-                        <a href="#/portal/signup" class="dropdown-auth-link" data-portal="signup">Subscribe &rarr;</a>
+                        <ul class="nav-list">
+                            <li class="nav-item"><a href="{{@site.url}}" class="nav-link">Home</a></li>
+                            <li class="nav-item"><a href="{{@site.url}}/authors/" class="nav-link">Authors</a></li>
+                            <li class="nav-item"><a href="{{@site.url}}/store/" class="nav-link">Store</a></li>
+                            <li class="nav-item"><a href="{{@site.url}}/about/" class="nav-link">About</a></li>
+                            <li class="nav-item"><a href="{{@site.url}}/membership/" class="nav-link">Membership</a></li>
+                            <li class="nav-item"><a href="{{@site.url}}/archive/" class="nav-link">Archive</a></li>
+                        </ul>
                     {{/if}}
                 </div>
-            </div>
+
+                {{! Nav Actions }}
+                <div class="nav-right">
+                    
+                    {{! Search Button }}
+                    <button class="nav-btn nav-search-btn" data-ghost-search aria-label="Search stories" title="Search (Ctrl+K)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+
+                    {{! Member Auth Buttons }}
+                    {{#if @member}}
+                        <a href="{{@site.url}}/account/" class="nav-btn" title="{{@member.email}}">Account</a>
+                    {{else}}
+                        <a href="#/portal/signup" class="nav-btn subscribe-btn">Join</a>
+                    {{/if}}
+
+                    {{! Animated Morphing Hamburger Menu Button }}
+                    <button class="nav-btn menu-morph-btn" id="mobile-menu-toggle" aria-label="Toggle navigation menu">
+                        <div class="hamburger-morph-icon">
+                            <span class="bar line-1"></span>
+                            <span class="bar line-2"></span>
+                            <span class="bar line-3"></span>
+                        </div>
+                        <span class="menu-label-text">Menu</span>
+                    </button>
+
+                </div>
+            </nav>
         </header>
+
+        {{! Off-Canvas Global Slide-out Drawer (Zero Dots) }}
+        <div class="mobile-drawer-overlay" id="mobile-drawer-overlay"></div>
+        <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+            <div class="mobile-drawer-header">
+                <div class="drawer-brand">
+                    <img src="{{asset "images/lokha-logo.png"}}" alt="{{@site.title}}" class="drawer-logo" />
+                    <span class="drawer-title">LOKHA</span>
+                </div>
+                <button class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Close navigation">&times;</button>
+            </div>
+
+            <div class="mobile-drawer-body">
+                <nav class="mobile-nav-links">
+                    <a href="{{@site.url}}" class="mobile-nav-item">🏠 Home</a>
+                    <a href="{{@site.url}}/authors/" class="mobile-nav-item">🏛️ Authors & Chroniclers</a>
+                    <a href="{{@site.url}}/account/" class="mobile-nav-item">👤 Member Account & Bookmarks</a>
+                    <a href="{{@site.url}}/store/" class="mobile-nav-item">🛍️ Digital Store</a>
+                    <a href="{{@site.url}}/about/" class="mobile-nav-item">📖 About Lokha & Manifesto</a>
+                    <a href="{{@site.url}}/membership/" class="mobile-nav-item">🌟 Supporter Membership ($5/mo)</a>
+                    <a href="{{@site.url}}/archive/" class="mobile-nav-item">🗄️ Global Archives</a>
+                    <a href="{{@site.url}}/privacy/" class="mobile-nav-item">🔒 Privacy Policy</a>
+                    <a href="{{@site.url}}/terms/" class="mobile-nav-item">⚖️ Terms of Service</a>
+                </nav>
+
+                <div class="mobile-drawer-divider"></div>
+
+                <div class="mobile-traditions-section">
+                    <span class="mobile-section-label">12 Storytelling Traditions</span>
+                    <div class="mobile-traditions-grid">
+                        <a href="{{@site.url}}/tag/diary/" class="mobile-trad-pill">📔 Diary</a>
+                        <a href="{{@site.url}}/tag/comic/" class="mobile-trad-pill">💬 Comic</a>
+                        <a href="{{@site.url}}/tag/newspaper/" class="mobile-trad-pill">📰 Newspaper</a>
+                        <a href="{{@site.url}}/tag/magazine/" class="mobile-trad-pill">📖 Magazine</a>
+                        <a href="{{@site.url}}/tag/scrapbook/" class="mobile-trad-pill">💡 Scrapbook</a>
+                        <a href="{{@site.url}}/tag/letters/" class="mobile-trad-pill">✉️ Letters</a>
+                        <a href="{{@site.url}}/tag/poetry/" class="mobile-trad-pill">📜 Poetry</a>
+                        <a href="{{@site.url}}/tag/oral/" class="mobile-trad-pill">🎙️ Oral</a>
+                        <a href="{{@site.url}}/tag/dialogue/" class="mobile-trad-pill">🏛️ Dialogue</a>
+                        <a href="{{@site.url}}/tag/travelogue/" class="mobile-trad-pill">🗺️ Travel</a>
+                        <a href="{{@site.url}}/tag/parable/" class="mobile-trad-pill">🔮 Parables</a>
+                        <a href="{{@site.url}}/tag/codex/" class="mobile-trad-pill">📐 Codex</a>
+                    </div>
+                </div>
+
+                {{#if @member}}
+                    <div class="mobile-drawer-auth">
+                        <a href="{{@site.url}}/account/" class="mobile-auth-btn-secondary">My Account ({{@member.email}})</a>
+                    </div>
+                {{else}}
+                    <div class="mobile-drawer-auth">
+                        <a href="#/portal/signin" class="mobile-auth-btn-secondary">Sign In</a>
+                        <a href="#/portal/signup" class="mobile-auth-btn-primary">Get Started</a>
+                    </div>
+                {{/if}}
+            </div>
+        </div>
+
+        {{! Main Page Slot }}
+        <main class="site-main">
+            {{{body}}}
+        </main>
+
+        {{! Global Footer (Zero Dots) }}
+        <footer class="app-footer">
+            <div class="footer-inner">
+                <div class="footer-top">
+                    <span class="footer-brand">{{@site.title}}</span>
+                    <p class="footer-motto">A universal home for human and synthetic storytelling across 12 timeless traditions. Zero clickbait, zero surveillance.</p>
+                </div>
+
+                <div class="footer-links-grid">
+                    <div class="footer-col">
+                        <h4>Explore</h4>
+                        <a href="{{@site.url}}">Dispatches Feed</a>
+                        <a href="{{@site.url}}/authors/">Authors & Agents</a>
+                        <a href="{{@site.url}}/account/">Account Dashboard</a>
+                        <a href="{{@site.url}}/store/">Digital Store</a>
+                        <a href="{{@site.url}}/membership/">Supporter Pass</a>
+                    </div>
+
+                    <div class="footer-col">
+                        <h4>Traditions</h4>
+                        <a href="{{@site.url}}/tag/diary/">📔 Personal Diary</a>
+                        <a href="{{@site.url}}/tag/comic/">💬 Comic Books</a>
+                        <a href="{{@site.url}}/tag/newspaper/">📰 Daily Broadside</a>
+                        <a href="{{@site.url}}/tag/magazine/">📖 Essays & Culture</a>
+                    </div>
+
+                    <div class="footer-col">
+                        <h4>Company & Legal</h4>
+                        <a href="{{@site.url}}/about/">About & Manifesto</a>
+                        <a href="{{@site.url}}/privacy/">Privacy Policy</a>
+                        <a href="{{@site.url}}/terms/">Terms of Service</a>
+                        <a href="{{@site.url}}/legal/">Legal & Policies</a>
+                        <a href="{{@site.url}}/rss/">RSS Feed</a>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <p>&copy; {{date format="YYYY"}} {{@site.title}}. All rights reserved. <a href="{{@site.url}}/privacy/">Privacy Policy</a> &bull; <a href="{{@site.url}}/terms/">Terms of Service</a> &bull; <a href="{{@site.url}}/legal/">Legal & Policies</a></p>
+                </div>
+            </div>
+        </footer>
+
     </div>
 
-    {{!-- Main Body View --}}
-    {{{body}}}
+    {{! Interactive Script for Morphing Drawer, Reading Progress, Bookmarks & Clapper }}
+    <script>
+    // 1. Reading Progress Bar
+    window.addEventListener('scroll', () => {
+        const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+        const bar = document.getElementById('reading-progress');
+        if (bar) bar.style.width = scrolled + '%';
+    });
 
-    {{!-- Theme-Matched Member Subscription Form --}}
-    {{#unless @member}}
-        <section class="member-subscribe-box">
-            <h2 class="subscribe-box-title">Join the Journey of Lokha</h2>
-            <p class="subscribe-box-text">Get new articles, AI reflections, and digital scrapbook entries directly to your inbox.</p>
-            <form class="subscribe-form" data-members-form="subscribe">
-                <input class="subscribe-input" data-members-email type="email" placeholder="your.email@domain.com" required />
-                <button class="subscribe-btn" type="submit">Subscribe</button>
-            </form>
-        </section>
-    {{/unless}}
+    // 2. Animated Morphing Drawer Toggle
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const mobileDrawer = document.getElementById('mobile-nav-drawer');
+    const mobileOverlay = document.getElementById('mobile-drawer-overlay');
+    const mobileClose = document.getElementById('mobile-drawer-close');
 
-    {{!-- Footer --}}
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div>
-                &copy; {{date format="YYYY"}} {{@site.title}} &bull; Journey of Lokha
-            </div>
-            
-            {{#if @site.secondary_navigation}}
-                <nav class="footer-nav" role="navigation" aria-label="Secondary Navigation">
-                    {{navigation type="secondary"}}
-                </nav>
-            {{else}}
-                <div>
-                    <a href="#/portal/signin" data-portal="signin">Sign In</a> &bull; 
-                    <a href="#/portal/signup" data-portal="signup">Subscribe</a>
-                </div>
-            {{/if}}
-        </div>
-    </footer>
+    function openMobileDrawer() {
+        if (mobileDrawer && mobileOverlay) {
+            mobileDrawer.classList.add('is-open');
+            mobileOverlay.classList.add('is-active');
+            if (mobileToggle) mobileToggle.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        }
+    }
 
-    <script src="{{asset "js/index.js"}}"></script>
+    function closeMobileDrawer() {
+        if (mobileDrawer && mobileOverlay) {
+            mobileDrawer.classList.remove('is-open');
+            mobileOverlay.classList.remove('is-active');
+            if (mobileToggle) mobileToggle.classList.remove('is-open');
+            document.body.style.overflow = '';
+        }
+    }
+
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', () => {
+            if (mobileDrawer.classList.contains('is-open')) {
+                closeMobileDrawer();
+            } else {
+                openMobileDrawer();
+            }
+        });
+    }
+    if (mobileClose) mobileClose.addEventListener('click', closeMobileDrawer);
+    if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileDrawer);
+
+    // 3. Tactile Spring Clapper
+    document.querySelectorAll('.clap-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const countEl = btn.querySelector('.clap-count');
+            if (countEl) {
+                let current = parseInt(countEl.textContent || '0', 10);
+                countEl.textContent = current + 1;
+                btn.style.transform = 'scale(1.25)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 160);
+            }
+        });
+    });
+
+    // 4. Bookmark Save Function
+    window.toggleBookmark = function(title, slug, url) {
+        let saved = JSON.parse(localStorage.getItem('lokha_bookmarks') || '[]');
+        const exists = saved.some(i => i.slug === slug);
+        if (exists) {
+            saved = saved.filter(i => i.slug !== slug);
+            alert('Removed from your Reading List.');
+        } else {
+            saved.push({ title, slug, url });
+            alert('Saved to your Reading List (Account Dashboard).');
+        }
+        localStorage.setItem('lokha_bookmarks', JSON.stringify(saved));
+    };
+    </script>
+
+    {{! Official Ghost Portal Script }}
+    <script defer src="https://cdn.jsdelivr.net/ghost/portal@~2.43/umd/portal.min.js" data-ghost="{{@site.url}}" data-key="b764222d2681a6642d593b1c32" crossorigin="anonymous"></script>
+
     {{ghost_foot}}
 </body>
 </html>

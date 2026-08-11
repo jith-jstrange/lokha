@@ -1,55 +1,59 @@
 {{!< default}}
 
-{{#tag}}
-<section class="site-hero">
-    <div class="hero-box">
-        <span class="hero-badge">Tag Archive</span>
-        <h1 class="hero-title">{{name}}</h1>
+<div class="editorial-home-container">
+
+    {{#tag}}
+    <header class="authors-hub-header">
+        <div class="hub-badge">TRADITION ARCHIVE</div>
+        <h1 class="hub-title">{{name}}</h1>
         {{#if description}}
-            <p class="hero-description">{{description}}</p>
+            <p class="hub-subtitle">{{description}}</p>
         {{/if}}
-    </div>
-</section>
-{{/tag}}
+    </header>
+    {{/tag}}
 
-<main class="main-content">
-    <div class="post-feed">
+    <section class="dispatches-stream">
         {{#foreach posts}}
-            <article class="post-card">
-                {{#if feature_image}}
-                    <a href="{{url}}" class="post-card-media">
-                        <img src="{{img_url feature_image size="m"}}" alt="{{title}}" loading="lazy">
-                    </a>
-                {{/if}}
+        <article class="dispatch-card {{post_class}}">
+            <div class="dispatch-content">
+                <div class="dispatch-header-meta">
+                    {{#primary_tag}}
+                        <span class="tag-badge">{{name}}</span>
+                    {{/primary_tag}}
+                    <span class="reading-time-pill">⏱ {{reading_time}}</span>
+                    <time datetime="{{date format="YYYY-MM-DD"}}" class="author-mini-date">&bull; {{date format="MMM D"}}</time>
+                </div>
 
-                <div class="post-card-body">
-                    <div class="post-card-meta">
-                        <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM DD, YYYY"}}</time>
-                    </div>
+                <h2 class="dispatch-title">
+                    <a href="{{url}}">{{title}}</a>
+                </h2>
 
-                    <h3 class="post-card-title">
-                        <a href="{{url}}">{{title}}</a>
-                    </h3>
+                <p class="dispatch-excerpt">{{excerpt words="24"}}...</p>
 
-                    <p class="post-card-excerpt">
-                        {{excerpt words="26"}}...
-                    </p>
+                <div class="dispatch-footer">
+                    {{#primary_author}}
+                        <a href="{{@site.url}}/authors/#{{slug}}" class="dispatch-author-link">By {{name}}</a>
+                    {{/primary_author}}
 
-                    <div class="post-card-footer">
-                        {{#primary_author}}
-                            <a href="{{url}}" class="author-link">
-                                {{#if profile_image}}
-                                    <img class="author-avatar" src="{{img_url profile_image size="xs"}}" alt="{{name}}">
-                                {{/if}}
-                                <span>{{name}}</span>
-                            </a>
-                        {{/primary_author}}
-                        <span>{{reading_time}}</span>
+                    <div class="dispatch-actions">
+                        <button class="action-icon-btn clap-btn" title="Clap">
+                            <span>👏</span>
+                            <span class="clap-count">0</span>
+                        </button>
+                        <a href="{{url}}" class="action-icon-btn">Read</a>
                     </div>
                 </div>
-            </article>
+            </div>
+
+            {{#if feature_image}}
+            <a href="{{url}}" class="dispatch-thumb-wrap">
+                <img src="{{img_url feature_image size="s"}}" alt="{{title}}" class="dispatch-thumb-img" loading="lazy" />
+            </a>
+            {{/if}}
+        </article>
         {{/foreach}}
-    </div>
+    </section>
 
     {{pagination}}
-</main>
+
+</div>

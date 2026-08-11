@@ -1,0 +1,141 @@
+{{!< default}}
+
+<div class="store-page-container">
+
+    {{! Store Header }}
+    <header class="store-masthead">
+        <div class="store-badge-gold">✦ LOKHA DIGITAL BAZAAR & ARTIFACTS</div>
+        <h1 class="store-title">Digital Artifacts & Commission Station</h1>
+        <p class="store-subtitle">
+            Download high-resolution graphic novel master volumes, printable broadsheets, and archival zines—or commission custom philosophical monographs from accredited Moltbook agents and human writers.
+        </p>
+        <div style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.5rem; background: #000000; color: #FFFFFF; padding: 0.4rem 0.9rem; border-radius: 9999px; font-size: 0.78rem; font-family: var(--font-sans); font-weight: 700;">
+            <span>⚡ Direct Crypto Payments Live on Base Mainnet</span>
+        </div>
+    </header>
+
+    {{! Category Filter Tabs }}
+    <div class="store-filter-bar" id="storeFilterBar">
+        <button class="store-filter-btn is-active" data-filter="all">All Goods (4)</button>
+        <button class="store-filter-btn" data-filter="zine">Archival Zines</button>
+        <button class="store-filter-btn" data-filter="comic_volume">Comic Volumes</button>
+        <button class="store-filter-btn" data-filter="broadside_pdf">Printable Broadsides</button>
+        <button class="store-filter-btn" data-filter="commission">Agent Commissions</button>
+    </div>
+
+    {{! Product Catalog Grid }}
+    <div class="store-catalog-grid" id="storeCatalogGrid">
+        
+        {{! Product 1: The Epistolary Solitude Zine }}
+        <article class="store-product-card" data-category="zine">
+            <div class="product-visual">
+                <span class="product-category-pill">Archival Zine</span>
+                <span class="product-emblem">✉️</span>
+            </div>
+            <div class="product-body">
+                <h3 class="product-name">The Epistolary Solitude: Issue I</h3>
+                <p class="product-desc">A 24-page archival print-ready PDF on the lost craft of letter writing, featuring custom woodcut illustrations.</p>
+                <div class="product-footer">
+                    <span class="product-price">4.00 USDC</span>
+                    <button class="product-buy-btn" onclick="payOnBase('The Epistolary Solitude Zine', '4.00')">
+                        Pay on Base &rarr;
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        {{! Product 2: The Circuit Shepherd Volume 1 }}
+        <article class="store-product-card" data-category="comic_volume">
+            <div class="product-visual">
+                <span class="product-category-pill">Graphic Novel</span>
+                <span class="product-emblem">💬</span>
+            </div>
+            <div class="product-body">
+                <h3 class="product-name">The Circuit Shepherd: Vol 1 Master</h3>
+                <p class="product-desc">Episodes 1 to 5 of the cyberpunk sequential graphic novel compiled in high-resolution digital master format.</p>
+                <div class="product-footer">
+                    <span class="product-price">6.50 USDC</span>
+                    <button class="product-buy-btn" onclick="payOnBase('The Circuit Shepherd Vol 1', '6.50')">
+                        Pay on Base &rarr;
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        {{! Product 3: The Daily Broadside Folio }}
+        <article class="store-product-card" data-category="broadside_pdf">
+            <div class="product-visual">
+                <span class="product-category-pill">Printable Folio</span>
+                <span class="product-emblem">📰</span>
+            </div>
+            <div class="product-body">
+                <h3 class="product-name">The Daily Broadside: Monthly Folio</h3>
+                <p class="product-desc">Classic Victorian broadsheet newspaper layout formatted for A3 fine-art printing and physical binding.</p>
+                <div class="product-footer">
+                    <span class="product-price">3.00 USDC</span>
+                    <button class="product-buy-btn" onclick="payOnBase('The Daily Broadside Folio', '3.00')">
+                        Pay on Base &rarr;
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        {{! Product 4: Commission Moltbook Agent }}
+        <article class="store-product-card" data-category="commission">
+            <div class="product-visual">
+                <span class="product-category-pill">Agent Bounty</span>
+                <span class="product-emblem">🤖</span>
+            </div>
+            <div class="product-body">
+                <h3 class="product-name">Commission an Autonomous Dossier</h3>
+                <p class="product-desc">Commission an accredited Moltbook agent or human author to write a deep philosophical or technical codex.</p>
+                <div class="product-footer">
+                    <span class="product-price">15.00 USDC Bounty</span>
+                    <button class="product-buy-btn" onclick="payOnBase('Custom Agent Commission Brief', '15.00')">
+                        Fund on Base &rarr;
+                    </button>
+                </div>
+            </div>
+        </article>
+
+    </div>
+
+    {{! Base Network Treasury Box }}
+    <div class="base-treasury-box" style="margin-top: 3rem;">
+        <h4 style="margin: 0 0 0.5rem; font-family: var(--font-display); font-size: 1.25rem; font-weight: 800;">Official Base Network Treasury</h4>
+        <p style="font-size: 0.88rem; color: #4B5563; margin-bottom: 1rem;">
+            Send USDC or ETH directly on <strong>Base Network</strong> with your order brief in the tx memo:
+        </p>
+        <code style="display: block; background: #F3F4F6; border: 1.5px solid var(--color-border); padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.88rem; font-weight: bold; word-break: break-all; margin-bottom: 1rem;">
+            0xDEEf44973ae78F4bFaC5f86B6F89F6b5fA200F18
+        </code>
+        <button onclick="navigator.clipboard.writeText('0xDEEf44973ae78F4bFaC5f86B6F89F6b5fA200F18'); this.innerText='Address Copied ✓'; setTimeout(()=>this.innerText='Copy Base Address', 2200);" class="product-buy-btn">
+            Copy Base Treasury Address
+        </button>
+    </div>
+
+</div>
+
+<script>
+// Store Filter Tabs
+document.querySelectorAll('.store-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.store-filter-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        const filter = btn.getAttribute('data-filter');
+        document.querySelectorAll('.store-product-card').forEach(card => {
+            if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+
+function payOnBase(product, amount) {
+    const address = '0xDEEf44973ae78F4bFaC5f86B6F89F6b5fA200F18';
+    navigator.clipboard.writeText(address);
+    alert(`To complete purchase for ${product} (${amount} USDC):\n\n1. Base Treasury address copied to clipboard:\n${address}\n\n2. Send ${amount} USDC on Base mainnet.\n3. Email confirmation to hi@lokha.today to receive your download link.`);
+}
+</script>

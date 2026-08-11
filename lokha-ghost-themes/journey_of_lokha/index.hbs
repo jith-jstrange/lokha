@@ -1,58 +1,184 @@
 {{!< default}}
 
-{{!-- Publication Editorial Masthead --}}
-<section class="publication-masthead">
-    <span class="masthead-badge">● Journey of Lokha</span>
-    <h1 class="masthead-title">{{@site.title}}</h1>
-    {{#if @site.description}}
-        <p class="masthead-description">{{@site.description}}</p>
-    {{/if}}
-</section>
+<div class="editorial-home-container">
 
-{{!-- Post Feed Section --}}
-<main class="main-content">
-    <h2 class="feed-header">Latest Articles</h2>
+    {{! 1. Top Editorial Spread: Lead Hero Story + Numbered Trending Stack (01-04) }}
+    {{#get "posts" limit="5" include="tags,authors" as |top_posts|}}
+    {{#if top_posts}}
+    <section class="editorial-hero-spread">
+        
+        {{! Left: Major Lead Hero Story }}
+        {{#foreach top_posts limit="1"}}
+        <article class="hero-lead-card {{post_class}}">
+            {{#if feature_image}}
+            <a href="{{url}}" class="lead-media-wrap">
+                <img src="{{img_url feature_image size="l"}}" alt="{{title}}" class="lead-media-img" loading="eager" />
+            </a>
+            {{/if}}
+            <div class="lead-content">
+                <div class="story-meta-row">
+                    {{#primary_tag}}
+                        <span class="tag-badge">{{name}}</span>
+                    {{/primary_tag}}
+                    <span class="reading-time-pill">⏱ {{reading_time}}</span>
+                    <span class="staff-pick-pill">✦ Staff Pick</span>
+                </div>
 
-    <div class="post-feed">
-        {{#foreach posts}}
-            <article class="post-card">
-                {{#if feature_image}}
-                    <a href="{{url}}" class="post-card-media">
-                        <img src="{{img_url feature_image size="m"}}" alt="{{title}}" loading="lazy">
-                    </a>
-                {{/if}}
+                <h1 class="lead-story-title">
+                    <a href="{{url}}">{{title}}</a>
+                </h1>
 
-                <div class="post-card-body">
-                    <div class="post-card-meta">
-                        {{#if primary_tag}}
-                            <a href="{{primary_tag.url}}" class="post-card-tag">{{primary_tag.name}}</a>
+                <p class="lead-story-excerpt">{{excerpt words="28"}}...</p>
+
+                <div class="story-author-footer">
+                    {{#primary_author}}
+                    <a href="{{@site.url}}/authors/#{{slug}}" class="author-pill">
+                        {{#if profile_image}}
+                            <img src="{{img_url profile_image size="xs"}}" alt="{{name}}" class="author-mini-avatar" />
                         {{/if}}
-                        <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM DD, YYYY"}}</time>
-                    </div>
+                        <div>
+                            <span class="author-mini-name">{{name}}</span>
+                            <div class="author-mini-date">{{date format="MMM D, YYYY"}}</div>
+                        </div>
+                    </a>
+                    {{/primary_author}}
 
-                    <h3 class="post-card-title">
-                        <a href="{{url}}">{{title}}</a>
-                    </h3>
-
-                    <p class="post-card-excerpt">
-                        {{excerpt words="26"}}...
-                    </p>
-
-                    <div class="post-card-footer">
-                        {{#primary_author}}
-                            <a href="{{url}}" class="author-link">
-                                {{#if profile_image}}
-                                    <img class="author-avatar" src="{{img_url profile_image size="xs"}}" alt="{{name}}">
-                                {{/if}}
-                                <span>{{name}}</span>
-                            </a>
-                        {{/primary_author}}
-                        <span>{{reading_time}}</span>
+                    <div class="dispatch-actions">
+                        <a href="{{url}}" class="action-icon-btn">Read Story &rarr;</a>
                     </div>
                 </div>
-            </article>
+            </div>
+        </article>
         {{/foreach}}
+
+        {{! Right: Trending on Lokha (Numbered 01 to 04) }}
+        <aside class="hero-trending-stack">
+            <div class="trending-header">
+                <span style="font-size: 1.2rem;">📈</span>
+                <h3>Trending on Lokha</h3>
+            </div>
+
+            <div class="trending-items-list">
+                {{#foreach top_posts from="2" to="5"}}
+                <article class="trending-item">
+                    <span class="trending-number">0{{@index}}</span>
+                    <div class="trending-item-content">
+                        <div class="story-meta-row" style="margin-bottom: 0.25rem;">
+                            {{#primary_author}}
+                                <span style="font-size: 0.76rem; font-weight: 700;">{{name}}</span>
+                            {{/primary_author}}
+                            {{#primary_tag}}
+                                <span style="font-size: 0.72rem; color: #6B7280;">in {{name}}</span>
+                            {{/primary_tag}}
+                        </div>
+                        <h4 class="trending-item-title">
+                            <a href="{{url}}">{{title}}</a>
+                        </h4>
+                        <div class="trending-item-meta">
+                            <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM D"}}</time>
+                            <span>&bull; {{reading_time}}</span>
+                        </div>
+                    </div>
+                </article>
+                {{/foreach}}
+            </div>
+        </aside>
+
+    </section>
+    {{/if}}
+    {{/get}}
+
+    {{! 2. 12 Traditions Horizontal Filter Pills }}
+    <div class="topic-filter-wrapper">
+        <div class="topic-scroll-track" id="topicFilterTrack">
+            <a href="{{@site.url}}" class="topic-filter-pill is-active">✨ All Dispatches</a>
+            <a href="{{@site.url}}/tag/diary/" class="topic-filter-pill">📔 Diary</a>
+            <a href="{{@site.url}}/tag/comic/" class="topic-filter-pill">💬 Comic</a>
+            <a href="{{@site.url}}/tag/newspaper/" class="topic-filter-pill">📰 Newspaper</a>
+            <a href="{{@site.url}}/tag/magazine/" class="topic-filter-pill">📖 Magazine</a>
+            <a href="{{@site.url}}/tag/scrapbook/" class="topic-filter-pill">💡 Scrapbook</a>
+            <a href="{{@site.url}}/tag/letters/" class="topic-filter-pill">✉️ Letters</a>
+            <a href="{{@site.url}}/tag/poetry/" class="topic-filter-pill">📜 Poetry</a>
+            <a href="{{@site.url}}/tag/oral/" class="topic-filter-pill">🎙️ Oral</a>
+            <a href="{{@site.url}}/tag/dialogue/" class="topic-filter-pill">🏛️ Dialogue</a>
+            <a href="{{@site.url}}/tag/travelogue/" class="topic-filter-pill">🗺️ Travel</a>
+            <a href="{{@site.url}}/tag/parable/" class="topic-filter-pill">🔮 Parables</a>
+            <a href="{{@site.url}}/tag/codex/" class="topic-filter-pill">📐 Codex</a>
+        </div>
     </div>
 
-    {{pagination}}
-</main>
+    {{! 3. Main 2-Column Stream & Sidebar }}
+    <div class="editorial-layout-grid">
+        
+        <main class="dispatches-stream">
+            {{#foreach posts}}
+            <article class="dispatch-card {{post_class}}">
+                <div class="dispatch-content">
+                    <div class="dispatch-header-meta">
+                        {{#primary_tag}}
+                            <span class="tag-badge">{{name}}</span>
+                        {{/primary_tag}}
+                        <span class="reading-time-pill">⏱ {{reading_time}}</span>
+                        <time datetime="{{date format="YYYY-MM-DD"}}" class="author-mini-date">&bull; {{date format="MMM D"}}</time>
+                    </div>
+
+                    <h2 class="dispatch-title">
+                        <a href="{{url}}">{{title}}</a>
+                    </h2>
+
+                    <p class="dispatch-excerpt">{{excerpt words="24"}}...</p>
+
+                    <div class="dispatch-footer">
+                        {{#primary_author}}
+                            <a href="{{@site.url}}/authors/#{{slug}}" class="dispatch-author-link">By {{name}}</a>
+                        {{/primary_author}}
+
+                        <div class="dispatch-actions">
+                            <button class="action-icon-btn clap-btn" title="Clap">
+                                <span>👏</span>
+                                <span class="clap-count">0</span>
+                            </button>
+                            <a href="{{url}}" class="action-icon-btn">Read</a>
+                        </div>
+                    </div>
+                </div>
+
+                {{#if feature_image}}
+                <a href="{{url}}" class="dispatch-thumb-wrap">
+                    <img src="{{img_url feature_image size="s"}}" alt="{{title}}" class="dispatch-thumb-img" loading="lazy" />
+                </a>
+                {{/if}}
+            </article>
+            {{else}}
+            <div class="dispatch-card">
+                <p>Welcome to Lokha. Fresh stories are coming soon.</p>
+            </div>
+            {{/foreach}}
+
+            {{! Pagination }}
+            {{pagination}}
+        </main>
+
+        <aside class="editorial-sidebar">
+            <div class="sidebar-widget">
+                <span style="font-size: 1.4rem; color: #D97706;">✦</span>
+                <h4 class="widget-title">The Lokha Agora</h4>
+                <p class="widget-text">
+                    A universal home for human and synthetic storytelling across 12 timeless traditions. Zero clickbait, zero surveillance.
+                </p>
+                <a href="{{@site.url}}/about/" class="widget-btn">Read Manifesto &rarr;</a>
+            </div>
+
+            <div class="sidebar-widget" style="background: #FFFDF0;">
+                <span class="staff-pick-pill" style="margin-bottom: 0.5rem; display: inline-block;">✦ SUPPORTER PASS</span>
+                <h4 class="widget-title">Unlimited Reading</h4>
+                <p class="widget-text">
+                    Get full archival access, deep cultural essays, and graphic novel dispatches for $5/mo.
+                </p>
+                <a href="{{@site.url}}/membership/" class="widget-btn">Become a Supporter</a>
+            </div>
+        </aside>
+
+    </div>
+
+</div>

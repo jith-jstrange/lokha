@@ -1,0 +1,83 @@
+{{!< default}}
+
+<div class="membership-page-container">
+
+    <header class="membership-header">
+        <span class="membership-emblem">✦</span>
+        <h1 class="membership-title">Lokha Membership & Supporter Pass</h1>
+        <p class="membership-subtitle">
+            Directly support independent, thoughtful human & synthetic storytelling. Read without noise, trackers, or commercial clutter.
+        </p>
+        <div style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.5rem; background: #000000; color: #FFFFFF; padding: 0.4rem 0.9rem; border-radius: 9999px; font-size: 0.78rem; font-family: var(--font-sans); font-weight: 700;">
+            <span>⚡ Instant Card Checkout via Creem & Crypto on Base Mainnet</span>
+        </div>
+    </header>
+
+    <div class="membership-plans-grid">
+        {{! Free Plan }}
+        <div class="membership-card">
+            <div class="membership-plan-tag">Free Forever</div>
+            <h3 class="membership-plan-name">Free Reader</h3>
+            <div class="membership-plan-price">$0<span style="font-size: 1rem; color: #6B7280;">/mo</span></div>
+            <div class="membership-benefits-list">
+                <div>✓ Public chronicles & articles</div>
+                <div>✓ Email newsletter dispatches</div>
+                <div>✓ Standard reading mode</div>
+            </div>
+            {{#if @member}}
+                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: #6B7280; padding: 0.75rem;">Current Active Tier</div>
+            {{else}}
+                <a href="#/portal/signup" class="membership-cta-btn" style="background: #FFFFFF; color: #000000;">
+                    Join Free &rarr;
+                </a>
+            {{/if}}
+        </div>
+
+        {{! Monthly Plan }}
+        <div class="membership-card">
+            <div class="membership-plan-tag" style="background: var(--color-gold-light); color: var(--color-gold-border);">Monthly</div>
+            <h3 class="membership-plan-name">Monthly Supporter</h3>
+            <div class="membership-plan-price">$5<span style="font-size: 1rem; color: #6B7280;">/mo</span></div>
+            <div class="membership-benefits-list">
+                <div>✓ Full access to all 12 storytelling traditions</div>
+                <div>✓ Unrestricted archives & deep cultural essays</div>
+                <div>✓ Audio narration on every dispatch</div>
+                <div>✓ Member community dialogue</div>
+            </div>
+            <a href="https://creem.io/product/prod_1zIxHl2CZ7Efx4ZE3lBCNP{{#if @member}}?customer_email={{@member.email}}{{/if}}" class="membership-cta-btn" target="_blank" rel="noopener">
+                Subscribe ($5/mo) &rarr;
+            </a>
+        </div>
+
+        {{! Yearly Plan }}
+        <div class="membership-card featured-card">
+            <div class="membership-plan-tag" style="background: var(--color-gold-light); color: var(--color-gold-border);">Save 17% • 2 Mo Free</div>
+            <h3 class="membership-plan-name">Annual Supporter</h3>
+            <div class="membership-plan-price">$50<span style="font-size: 1rem; color: #6B7280;">/yr</span></div>
+            <div class="membership-benefits-list">
+                <div>✓ Everything in Monthly</div>
+                <div>✓ 2 months free ($10 discount)</div>
+                <div>✓ Founding supporter badge</div>
+                <div>✓ Direct author correspondence</div>
+            </div>
+            <a href="https://creem.io/product/prod_1QoaqCLA6UqaNTBH76XzqZ{{#if @member}}?customer_email={{@member.email}}{{/if}}" class="membership-cta-btn" target="_blank" rel="noopener">
+                Subscribe ($50/yr) &rarr;
+            </a>
+        </div>
+    </div>
+
+    {{! Base Network Treasury Box }}
+    <div class="base-treasury-box">
+        <h4 style="margin: 0 0 0.5rem; font-family: var(--font-display); font-size: 1.25rem; font-weight: 800;">Pay with Crypto on Base Network</h4>
+        <p style="font-size: 0.88rem; color: #4B5563; margin-bottom: 1rem;">
+            Send USDC or ETH directly to the official <strong>Base Network</strong> treasury address:
+        </p>
+        <code style="display: block; background: #F3F4F6; border: 1.5px solid var(--color-border); padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.88rem; font-weight: bold; word-break: break-all; margin-bottom: 1rem;">
+            0xDEEf44973ae78F4bFaC5f86B6F89F6b5fA200F18
+        </code>
+        <button onclick="navigator.clipboard.writeText('0xDEEf44973ae78F4bFaC5f86B6F89F6b5fA200F18'); this.innerText='Address Copied ✓'; setTimeout(()=>this.innerText='Copy Base Address', 2200);" class="product-buy-btn">
+            Copy Base Treasury Address
+        </button>
+    </div>
+
+</div>

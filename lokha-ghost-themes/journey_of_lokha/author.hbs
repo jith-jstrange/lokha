@@ -1,50 +1,59 @@
 {{!< default}}
 
-{{#author}}
-<section class="site-hero">
-    <div class="hero-box">
-        <span class="hero-badge">Author Archive</span>
-        <h1 class="hero-title">{{name}}</h1>
+<div class="editorial-home-container">
+
+    {{#author}}
+    <header class="authors-hub-header">
+        <div class="hub-badge">AUTHOR PROFILE</div>
+        <h1 class="hub-title">{{name}}</h1>
         {{#if bio}}
-            <p class="hero-description">{{bio}}</p>
+            <p class="hub-subtitle">{{bio}}</p>
         {{/if}}
-    </div>
-</section>
-{{/author}}
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;">
+            <a href="{{@site.url}}/authors/#{{slug}}" class="action-icon-btn">View Full Agora Profile &rarr;</a>
+        </div>
+    </header>
+    {{/author}}
 
-<main class="main-content">
-    <div class="post-feed">
+    <section class="dispatches-stream">
         {{#foreach posts}}
-            <article class="post-card">
-                {{#if feature_image}}
-                    <a href="{{url}}" class="post-card-media">
-                        <img src="{{img_url feature_image size="m"}}" alt="{{title}}" loading="lazy">
-                    </a>
-                {{/if}}
+        <article class="dispatch-card {{post_class}}">
+            <div class="dispatch-content">
+                <div class="dispatch-header-meta">
+                    {{#primary_tag}}
+                        <span class="tag-badge">{{name}}</span>
+                    {{/primary_tag}}
+                    <span class="reading-time-pill">⏱ {{reading_time}}</span>
+                    <time datetime="{{date format="YYYY-MM-DD"}}" class="author-mini-date">&bull; {{date format="MMM D"}}</time>
+                </div>
 
-                <div class="post-card-body">
-                    <div class="post-card-meta">
-                        {{#if primary_tag}}
-                            <a href="{{primary_tag.url}}" class="post-card-tag">{{primary_tag.name}}</a>
-                        {{/if}}
-                        <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM DD, YYYY"}}</time>
-                    </div>
+                <h2 class="dispatch-title">
+                    <a href="{{url}}">{{title}}</a>
+                </h2>
 
-                    <h3 class="post-card-title">
-                        <a href="{{url}}">{{title}}</a>
-                    </h3>
+                <p class="dispatch-excerpt">{{excerpt words="24"}}...</p>
 
-                    <p class="post-card-excerpt">
-                        {{excerpt words="26"}}...
-                    </p>
+                <div class="dispatch-footer">
+                    <a href="{{url}}" class="dispatch-author-link">Read Story &rarr;</a>
 
-                    <div class="post-card-footer">
-                        <span>{{reading_time}}</span>
+                    <div class="dispatch-actions">
+                        <button class="action-icon-btn clap-btn" title="Clap">
+                            <span>👏</span>
+                            <span class="clap-count">0</span>
+                        </button>
                     </div>
                 </div>
-            </article>
+            </div>
+
+            {{#if feature_image}}
+            <a href="{{url}}" class="dispatch-thumb-wrap">
+                <img src="{{img_url feature_image size="s"}}" alt="{{title}}" class="dispatch-thumb-img" loading="lazy" />
+            </a>
+            {{/if}}
+        </article>
         {{/foreach}}
-    </div>
+    </section>
 
     {{pagination}}
-</main>
+
+</div>
