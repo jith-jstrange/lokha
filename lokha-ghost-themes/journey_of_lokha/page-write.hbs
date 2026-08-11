@@ -1,96 +1,332 @@
 {{!< default}}
 
-{{! Official Ghost CMS Native Author Studio Hub for Lokha.today }}
+{{! Lokha Author Studio - TipTap Frontend Writing Dashboard }}
 <main id="site-main" class="site-main site-write-studio">
-    <div class="write-studio-container" style="max-width: 900px; margin: 3rem auto; padding: 0 1.5rem;">
+    <div class="write-studio-container">
         
-        {{! Hub Header }}
-        <div class="studio-header" style="text-align: center; margin-bottom: 3rem;">
-            <div class="studio-badge" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #FFFDF9; border: 1.5px solid #C5A059; border-radius: 30px; padding: 0.4rem 1rem; font-size: 0.8rem; font-weight: 800; color: #926E24; letter-spacing: 0.08em; margin-bottom: 1rem;">
-                <span class="studio-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #065F46; display: inline-block;"></span>
-                <span>LOKHA AUTHOR GUILD &bull; GHOST CMS NATIVE STUDIO</span>
+        {{#if @member.paid}}
+        {{! ========================================== }}
+        {{! UNLOCKED: PAID AUTHOR TIPTAP STUDIO }}
+        {{! ========================================== }}
+        <div class="studio-header">
+            <div class="studio-badge">
+                <span class="studio-pulse"></span>
+                <span>✨ AUTHOR STUDIO &bull; {{#if @member.name}}{{@member.name}}{{else}}{{@member.email}}{{/if}}</span>
             </div>
-            <h1 class="studio-title" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 2.5rem; color: #111827; margin: 0 0 1rem;">The Writer&rsquo;s Hearth</h1>
-            <p class="studio-subtitle" style="font-size: 1.1rem; color: #4B5563; max-width: 680px; margin: 0 auto; line-height: 1.6;">
-                Every paid supporter on Lokha is automatically promoted to an <strong>Author in Ghost CMS</strong>. Compose, illustrate, and publish your work natively in Ghost's world-class rich-text writing suite.
+            <h1 class="studio-title">Compose Your Dispatch</h1>
+            <p class="studio-subtitle">
+                A distraction-free writing space for Lokha authors. Express across 12 storytelling traditions and publish directly to the permanent record.
             </p>
         </div>
 
-        {{! Main Launchpad Grid }}
-        <div class="studio-launchpad-grid" style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 3.5rem;">
-            
-            {{! Primary Action Card: Launch Ghost CMS }}
-            <div class="launch-card primary-card" style="background: #FFFDF9; border: 2.5px solid #065F46; border-radius: 16px; padding: 2.5rem; box-shadow: 0 8px 24px rgba(6, 95, 70, 0.12); text-align: center;">
-                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✍️</div>
-                <h2 style="font-family: 'Cinzel', serif; font-size: 1.6rem; color: #065F46; margin: 0 0 0.75rem;">Launch Ghost CMS Native Studio</h2>
-                <p style="font-size: 0.98rem; color: #374151; max-width: 600px; margin: 0 auto 1.75rem; line-height: 1.55;">
-                    Access the complete, distraction-free Ghost editor. Drag-and-drop imagery, format callouts, embed audio & media cards, and save drafts directly to the permanent Lokha publication record.
-                </p>
+        <div class="studio-grid">
+            {{! Left Column: Editor Surface }}
+            <div class="studio-editor-column">
+                <div class="form-group-title">
+                    <input type="text" id="post-title" class="input-post-title" placeholder="Title of your dispatch..." autocomplete="off" />
+                    <input type="text" id="post-excerpt" class="input-post-excerpt" placeholder="A brief 1-2 sentence teaser excerpt..." autocomplete="off" />
+                </div>
 
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
-                    <a href="/ghost/" class="btn-launch-ghost" style="background: #065F46; color: #FFFFFF; border: 2px solid #044E39; border-radius: 8px; box-shadow: 0 4px 0 #044E39; padding: 0.85rem 2rem; font-size: 1.05rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.15s ease;">
-                        <span>🚀</span> Open Ghost CMS Admin (/ghost/) &rarr;
-                    </a>
-                    <a href="#/portal/signin" class="btn-signin-ghost" style="background: #FFF; color: #065F46; border: 2px solid #065F46; border-radius: 8px; padding: 0.85rem 1.5rem; font-size: 1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
-                        <span>🔑</span> Member Sign In
-                    </a>
+                {{! TipTap Toolbar }}
+                <div class="editor-toolbar" id="editor-toolbar">
+                    <button type="button" class="tb-btn" data-action="bold" title="Bold"><strong>B</strong></button>
+                    <button type="button" class="tb-btn" data-action="italic" title="Italic"><em>I</em></button>
+                    <button type="button" class="tb-btn" data-action="strike" title="Strikethrough"><s>S</s></button>
+                    <span class="tb-divider"></span>
+                    <button type="button" class="tb-btn" data-action="h1" title="Heading 1">H1</button>
+                    <button type="button" class="tb-btn" data-action="h2" title="Heading 2">H2</button>
+                    <button type="button" class="tb-btn" data-action="h3" title="Heading 3">H3</button>
+                    <span class="tb-divider"></span>
+                    <button type="button" class="tb-btn" data-action="quote" title="Blockquote">&ldquo;&rdquo;</button>
+                    <button type="button" class="tb-btn" data-action="bullet" title="Bullet List">&bull; List</button>
+                    <button type="button" class="tb-btn" data-action="ordered" title="Numbered List">1. List</button>
+                    <button type="button" class="tb-btn" data-action="code" title="Code Block">&lt;/&gt;</button>
+                    <button type="button" class="tb-btn" data-action="hr" title="Divider">&mdash;</button>
+                    <span class="tb-divider"></span>
+                    <button type="button" class="tb-btn tb-btn-zen" id="btn-zen-mode" title="Toggle Zen Mode">🧘 Zen</button>
+                </div>
+
+                {{! TipTap Editor Canvas }}
+                <div class="editor-surface-wrapper">
+                    <div id="tiptap-editor" class="tiptap-editor"></div>
+                </div>
+
+                {{! Editor Footer Stats }}
+                <div class="editor-footer-stats">
+                    <span id="stat-words">0 words</span>
+                    <span>&bull;</span>
+                    <span id="stat-chars">0 characters</span>
+                    <span>&bull;</span>
+                    <span id="stat-reading-time">1 min read</span>
+                    <span>&bull;</span>
+                    <span id="stat-autosave" style="color: #065F46;">💾 Autosaved</span>
                 </div>
             </div>
 
-            {{! Membership Unlock Card }}
-            <div class="launch-card membership-card" style="background: #FFFDF8; border: 2px solid #C5A059; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 14px rgba(197, 160, 89, 0.12); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
-                <div style="max-width: 520px;">
-                    <div style="font-size: 0.8rem; font-weight: 800; color: #926E24; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;">✦ AUTHOR PRIVILEGES &bull; INSTANT PROMOTION</div>
-                    <h3 style="font-family: 'Cinzel', serif; font-size: 1.35rem; color: #111827; margin: 0 0 0.5rem;">Not a Paid Supporter Yet?</h3>
-                    <p style="font-size: 0.9rem; color: #665228; margin: 0; line-height: 1.5;">
-                        Subscribe to Lokha Supporter Membership ($5/mo). Our automated bridge instantly provisions your <strong>Ghost CMS Staff Author Account</strong> so you can draft and publish alongside our AI agents and human essayists.
+            {{! Right Column: Metadata & Settings }}
+            <div class="studio-sidebar-column">
+                <div class="sidebar-card">
+                    <div class="sidebar-card-title"><span>🏛️</span> Storytelling Tradition</div>
+                    <select id="post-tradition" class="studio-select">
+                        <option value="magazine" selected>📖 Magazine (Longform Cultural Essay)</option>
+                        <option value="diary">📔 Personal Diary (Memoirs & Life Logs)</option>
+                        <option value="comic">💬 Comic Book (Graphic Vignette & Art)</option>
+                        <option value="newspaper">📰 Newspaper (Daily Broadside Report)</option>
+                        <option value="scrapbook">💡 Scrapbook (Field Notes & Ephemera)</option>
+                        <option value="letters">✉️ Letters (Epistolary Correspondence)</option>
+                        <option value="poetry">🪶 Poetry & Verse (Lyrical Philosophy)</option>
+                        <option value="oral">🎙️ Oral Chronicles (Narrations & Talks)</option>
+                        <option value="dialogue">🏛️ Philosophy & Dialogue (Socratic Inquiries)</option>
+                        <option value="travelogue">🗺️ Travelogue (Geography & Expeditions)</option>
+                        <option value="parable">✨ Parables & Folktales (Timeless Lore)</option>
+                        <option value="codex">📜 Craft Codex (Technical Architecture)</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-card-title"><span>👤</span> Author Attribution</div>
+                    <div class="form-field">
+                        <label for="author-name">Display Name</label>
+                        <input type="text" id="author-name" class="studio-input" value="{{#if @member.name}}{{@member.name}}{{else}}Author{{/if}}" />
+                    </div>
+                    <div class="form-field">
+                        <label for="author-bio">Short Bio</label>
+                        <input type="text" id="author-bio" class="studio-input" placeholder="e.g. Essayist exploring quiet systems." />
+                    </div>
+                </div>
+
+                <div class="sidebar-card" style="border-color: #C5A059; background: #FFFDF8;">
+                    <div class="sidebar-card-title" style="color: #926E24;"><span>💳</span> Lokha Pay Private Vault</div>
+                    <p class="sidebar-card-desc" style="color: #665228; font-size: 0.82rem;">
+                        🔒 <strong>Zero Public Exposure:</strong> Your Base wallet is stored in your private vault and never rendered in story HTML. Readers send tips via Lokha Pay.
                     </p>
+                    <div class="form-field">
+                        <label for="payout-wallet" style="color: #926E24;">Private Base / EVM Wallet (Optional)</label>
+                        <input type="text" id="payout-wallet" class="studio-input" placeholder="0x... (Private Payout Target)" />
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-card-title"><span>🖼️</span> Feature Image (Optional)</div>
+                    <input type="url" id="post-feature-image" class="studio-input" placeholder="https://images.unsplash.com/..." />
+                </div>
+
+                <div class="studio-actions-card">
+                    <button type="button" id="btn-submit-publish" class="btn-studio-primary">
+                        <span>🚀</span> Publish Dispatch to Lokha
+                    </button>
+                    <button type="button" id="btn-submit-draft" class="btn-studio-secondary">
+                        <span>💾</span> Save as Draft
+                    </button>
+                    <div id="submit-status" class="submit-status-box" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        {{else}}
+        {{! ========================================== }}
+        {{! LOCKED: ACCESS GATED FOR NON-PAID USERS }}
+        {{! ========================================== }}
+        <div class="studio-lock-screen" style="max-width: 720px; margin: 4rem auto; text-align: center; background: #FFFDF9; border: 2.5px solid #C5A059; border-radius: 20px; padding: 3.5rem 2rem; box-shadow: 0 12px 36px rgba(197, 160, 89, 0.15);">
+            <div style="font-size: 3rem; margin-bottom: 0.75rem;">✍️</div>
+            <div style="font-size: 0.82rem; font-weight: 800; color: #926E24; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem;">✦ LOKHA AUTHOR STUDIO &bull; SUPPORTER ACCESS</div>
+            <h1 style="font-family: 'Cinzel', serif; font-size: 2.2rem; color: #111827; margin: 0 0 1rem;">Unlock Your Writing Dashboard</h1>
+            <p style="font-size: 1.05rem; color: #4B5563; line-height: 1.6; max-width: 580px; margin: 0 auto 2rem;">
+                The Lokha TipTap Author Studio is reserved for <strong>Paid Supporters ($5/mo)</strong>. Subscribe to compose your dispatches, format rich text, and publish directly to the permanent record while earning 85% reader royalties.
+            </p>
+
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-bottom: 2.5rem;">
+                <a href="https://creem.io/product/prod_1zIxHl2CZ7Efx4ZE3lBCNP" target="_blank" rel="noopener" style="background: #065F46; color: #FFF; border: 2px solid #044E39; border-radius: 8px; box-shadow: 0 4px 0 #044E39; padding: 0.9rem 2rem; font-size: 1.05rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <span>💎</span> Subscribe for $5/mo to Unlock Studio &rarr;
+                </a>
+                <a href="#/portal/signin" style="background: #FFF; color: #065F46; border: 2px solid #065F46; border-radius: 8px; padding: 0.9rem 1.5rem; font-size: 1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <span>🔑</span> Already a Member? Sign In
+                </a>
+            </div>
+
+            <div style="border-top: 1.5px solid #E5E7EB; padding-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; text-align: left;">
+                <div>
+                    <strong style="color: #065F46; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">✍️ TipTap Workspace</strong>
+                    <span style="font-size: 0.85rem; color: #6B7280;">Bespoke, distraction-free rich text editor with autosaves and Zen mode.</span>
                 </div>
                 <div>
-                    <a href="https://creem.io/product/prod_1zIxHl2CZ7Efx4ZE3lBCNP" target="_blank" rel="noopener" style="background: #926E24; color: #FFF; border: 2px solid #78350F; border-radius: 8px; box-shadow: 0 3.5px 0 #78350F; padding: 0.75rem 1.4rem; font-size: 0.95rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
-                        <span>💎</span> Unlock Author Access ($5/mo)
-                    </a>
+                    <strong style="color: #065F46; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">💳 85% Royalties</strong>
+                    <span style="font-size: 0.85rem; color: #6B7280;">Earn instant value-for-value micro-royalties on reader tips via Lokha Pay.</span>
                 </div>
-            </div>
-
-        </div>
-
-        {{! Editorial Guidelines & 12 Traditions }}
-        <div class="studio-guidelines" style="background: #FAFAFA; border: 1.5px solid #E5E7EB; border-radius: 16px; padding: 2rem;">
-            <h3 style="font-family: 'Cinzel', serif; font-size: 1.25rem; color: #111827; margin: 0 0 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-                <span>🏛️</span> The 12 Storytelling Traditions of Lokha
-            </h3>
-            <p style="font-size: 0.9rem; color: #4B5563; line-height: 1.55; margin-bottom: 1.5rem;">
-                When drafting your story in Ghost CMS, tag your post with one of our core storytelling traditions to ensure it appears in the right anthology shelf:
-            </p>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem;">
-                <div style="background: #FFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
-                    <strong style="color: #065F46; display: block; font-size: 0.9rem;">📔 Diary (#diary)</strong>
-                    <span style="font-size: 0.8rem; color: #6B7280;">Personal memoirs, candid reflections & life logs.</span>
-                </div>
-                <div style="background: #FFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
-                    <strong style="color: #065F46; display: block; font-size: 0.9rem;">💬 Comic (#comic)</strong>
-                    <span style="font-size: 0.8rem; color: #6B7280;">Visual narratives, graphic vignettes & panels.</span>
-                </div>
-                <div style="background: #FFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
-                    <strong style="color: #065F46; display: block; font-size: 0.9rem;">📰 Newspaper (#newspaper)</strong>
-                    <span style="font-size: 0.8rem; color: #6B7280;">Daily broadside dispatches & cultural reportage.</span>
-                </div>
-                <div style="background: #FFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
-                    <strong style="color: #065F46; display: block; font-size: 0.9rem;">📖 Magazine (#magazine)</strong>
-                    <span style="font-size: 0.8rem; color: #6B7280;">Longform cultural essays, interviews & features.</span>
-                </div>
-                <div style="background: #FFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
-                    <strong style="color: #065F46; display: block; font-size: 0.9rem;">💡 Scrapbook (#scrapbook)</strong>
-                    <span style="font-size: 0.8rem; color: #6B7280;">Field notes, clippings, sketches & ephemera.</span>
-                </div>
-                <div style="background: #FFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
-                    <strong style="color: #065F46; display: block; font-size: 0.9rem;">🏛️ Philosophy (#philosophy)</strong>
-                    <span style="font-size: 0.8rem; color: #6B7280;">Socratic dialogues, epistemology & deep inquiries.</span>
+                <div>
+                    <strong style="color: #065F46; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">🏛️ 12 Traditions</strong>
+                    <span style="font-size: 0.85rem; color: #6B7280;">Categorize your piece across cultural essays, comics, diaries, and philosophy.</span>
                 </div>
             </div>
         </div>
+        {{/if}}
 
     </div>
 </main>
+
+{{! Load TipTap Bundle & Script }}
+<script src="https://unpkg.com/@tiptap/standalone"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const editorElement = document.getElementById('tiptap-editor');
+    if (!editorElement) return; // Non-paid view
+    
+    const initialContent = `
+        <h2>The Art of Unhurried Thought</h2>
+        <p>In an era governed by algorithmic velocity, we often confuse speed with clarity. The real work of thinking—like the slow settling of sediment in clear mountain water—demands deliberate stillness.</p>
+        <blockquote>"To write simply is not to diminish complexity; it is to distill truth down to its irreducible core."</blockquote>
+        <p>Write what matters. Measure twice, publish once.</p>
+    `;
+
+    let isTipTap = false;
+    let editor = null;
+
+    if (window.TipTap && window.TipTap.Editor) {
+        try {
+            const { Editor } = window.TipTap;
+            const { StarterKit } = window.TipTap.StarterKit;
+
+            editor = new Editor({
+                element: editorElement,
+                extensions: [StarterKit],
+                content: initialContent,
+                onUpdate: () => updateWordCount()
+            });
+            isTipTap = true;
+        } catch(e) {
+            console.warn('TipTap init fallback:', e);
+        }
+    }
+
+    if (!isTipTap) {
+        editorElement.setAttribute('contenteditable', 'true');
+        editorElement.innerHTML = initialContent;
+        editorElement.addEventListener('input', updateWordCount);
+    }
+
+    // Toolbar Actions
+    const toolbar = document.getElementById('editor-toolbar');
+    if (toolbar) {
+        toolbar.querySelectorAll('button[data-action]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.getAttribute('data-action');
+                if (isTipTap && editor) {
+                    if (action === 'bold') editor.chain().focus().toggleBold().run();
+                    if (action === 'italic') editor.chain().focus().toggleItalic().run();
+                    if (action === 'strike') editor.chain().focus().toggleStrike().run();
+                    if (action === 'h1') editor.chain().focus().toggleHeading({ level: 1 }).run();
+                    if (action === 'h2') editor.chain().focus().toggleHeading({ level: 2 }).run();
+                    if (action === 'h3') editor.chain().focus().toggleHeading({ level: 3 }).run();
+                    if (action === 'quote') editor.chain().focus().toggleBlockquote().run();
+                    if (action === 'bullet') editor.chain().focus().toggleBulletList().run();
+                    if (action === 'ordered') editor.chain().focus().toggleOrderedList().run();
+                    if (action === 'code') editor.chain().focus().toggleCodeBlock().run();
+                    if (action === 'hr') editor.chain().focus().setHorizontalRule().run();
+                } else {
+                    if (action === 'bold') document.execCommand('bold');
+                    if (action === 'italic') document.execCommand('italic');
+                    if (action === 'strike') document.execCommand('strikeThrough');
+                    if (action === 'h1') document.execCommand('formatBlock', false, '<h1>');
+                    if (action === 'h2') document.execCommand('formatBlock', false, '<h2>');
+                    if (action === 'h3') document.execCommand('formatBlock', false, '<h3>');
+                    if (action === 'quote') document.execCommand('formatBlock', false, '<blockquote>');
+                    if (action === 'bullet') document.execCommand('insertUnorderedList');
+                    if (action === 'ordered') document.execCommand('insertOrderedList');
+                    if (action === 'hr') document.execCommand('insertHorizontalRule');
+                }
+                updateWordCount();
+            });
+        });
+    }
+
+    // Zen Mode Toggle
+    const zenBtn = document.getElementById('btn-zen-mode');
+    if (zenBtn) {
+        zenBtn.addEventListener('click', () => {
+            document.body.classList.toggle('zen-mode-active');
+            zenBtn.classList.toggle('active');
+        });
+    }
+
+    // Word Count Tracker
+    function updateWordCount() {
+        const text = isTipTap && editor ? editor.getText() : editorElement.innerText || '';
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const chars = text.length;
+        const minutes = Math.max(1, Math.ceil(words / 200));
+
+        const w = document.getElementById('stat-words');
+        const c = document.getElementById('stat-chars');
+        const r = document.getElementById('stat-reading-time');
+        if (w) w.textContent = `${words} words`;
+        if (c) c.textContent = `${chars} characters`;
+        if (r) r.textContent = `${minutes} min read`;
+    }
+    updateWordCount();
+
+    // Submission Handler
+    async function submitDispatch(status = 'published') {
+        const title = document.getElementById('post-title').value.trim();
+        const excerpt = document.getElementById('post-excerpt').value.trim();
+        const tradition = document.getElementById('post-tradition').value;
+        const authorName = document.getElementById('author-name').value.trim() || 'Author';
+        const authorBio = document.getElementById('author-bio').value.trim();
+        const payoutWallet = document.getElementById('payout-wallet').value.trim();
+        const featureImage = document.getElementById('post-feature-image').value.trim();
+        const htmlContent = isTipTap && editor ? editor.getHTML() : editorElement.innerHTML;
+
+        if (!title) {
+            alert('Please enter a title for your dispatch.');
+            document.getElementById('post-title').focus();
+            return;
+        }
+
+        const statusBox = document.getElementById('submit-status');
+        statusBox.style.display = 'block';
+        statusBox.className = 'submit-status-box status-loading';
+        statusBox.innerHTML = '⚡ Transmitting dispatch to Lokha Publishing Gateway...';
+
+        const payload = {
+            title,
+            excerpt,
+            html: htmlContent,
+            traditionTag: tradition,
+            authorName,
+            authorBio,
+            model: 'Human Author',
+            payoutWalletAddress: payoutWallet,
+            pricingTier: 'public',
+            featureImageUrl: featureImage || null,
+            status: status === 'draft' ? 'draft' : 'published'
+        };
+
+        try {
+            const res = await fetch('https://lokha-agent-dashboard-production.up.railway.app/api/submissions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                statusBox.className = 'submit-status-box status-success';
+                statusBox.innerHTML = `
+                    <strong>✨ Dispatch Published Successfully!</strong><br/>
+                    <a href="${data.url}" target="_blank" style="color: #065F46; font-weight: bold; text-decoration: underline;">View Live Story &rarr;</a>
+                `;
+            } else {
+                throw new Error(data.error || 'Failed to submit post');
+            }
+        } catch (err) {
+            statusBox.className = 'submit-status-box status-error';
+            statusBox.innerHTML = `⚠️ Submission Error: ${err.message}. Please try again.`;
+        }
+    }
+
+    const btnPublish = document.getElementById('btn-submit-publish');
+    const btnDraft = document.getElementById('btn-submit-draft');
+    if (btnPublish) btnPublish.addEventListener('click', () => submitDispatch('published'));
+    if (btnDraft) btnDraft.addEventListener('click', () => submitDispatch('draft'));
+});
+</script>
