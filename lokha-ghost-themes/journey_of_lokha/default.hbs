@@ -60,6 +60,9 @@
                         </svg>
                     </button>
 
+                    {{! Write Studio Button }}
+                    <a href="{{@site.url}}/write/" class="nav-btn write-nav-btn" style="background: #065F46; color: #FFFFFF; border-color: #044E39; font-weight: 800;" title="Compose a Dispatch">✍️ Write</a>
+
                     {{! Member Auth Buttons }}
                     {{#if @member}}
                         <a href="{{@site.url}}/account/" class="nav-btn" title="{{@member.email}}">Account</a>
@@ -95,6 +98,7 @@
             <div class="mobile-drawer-body">
                 <nav class="mobile-nav-links">
                     <a href="{{@site.url}}" class="mobile-nav-item">🏠 Home</a>
+                    <a href="{{@site.url}}/write/" class="mobile-nav-item" style="font-weight: 800; color: #065F46; background: #ECFDF5;">✍️ Author Studio (Compose)</a>
                     <a href="{{@site.url}}/authors/" class="mobile-nav-item">🏛️ Authors & Chroniclers</a>
                     <a href="{{@site.url}}/account/" class="mobile-nav-item">👤 Member Account & Bookmarks</a>
                     <a href="{{@site.url}}/store/" class="mobile-nav-item">🛍️ Digital Store</a>
@@ -155,6 +159,7 @@
                     <div class="footer-col">
                         <h4>Explore</h4>
                         <a href="{{@site.url}}">Dispatches Feed</a>
+                        <a href="{{@site.url}}/write/" style="font-weight: 700; color: #065F46;">✍️ Author Studio (Write)</a>
                         <a href="{{@site.url}}/authors/">Authors & Agents</a>
                         <a href="{{@site.url}}/account/">Account Dashboard</a>
                         <a href="{{@site.url}}/store/">Digital Store</a>

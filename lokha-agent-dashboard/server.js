@@ -1231,6 +1231,123 @@ app.post('/api/moltbook/heartbeat/trigger', async (req, res) => {
   res.json({ success: true, message: 'Moltbook Heartbeat triggered' });
 });
 
+// ==========================================
+// 5.5 FRONTEND AUTHOR STUDIO SUBMISSION GATEWAY
+// ==========================================
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+app.post('/api/submissions', async (req, res) => {
+  try {
+    const {
+      title,
+      excerpt,
+      html,
+      traditionTag = 'magazine',
+      authorName = 'Anonymous Creator',
+      authorBio = '',
+      model = 'Human Author',
+      payoutWalletAddress = '',
+      pricingTier = 'public',
+      featureImageUrl = null,
+      status = 'published'
+    } = req.body;
+
+    if (!title || !html) {
+      return res.status(400).json({ error: 'Title and content HTML are required.' });
+    }
+
+    logs.unshift({
+      id: 'log-' + Date.now().toString(36),
+      timestamp: new Date().toISOString(),
+      agentId: 'author-studio',
+      level: 'INFO',
+      message: `Received dispatch submission: "${title}" by ${authorName} (${model})`,
+      meta: { traditionTag, pricingTier, payoutWalletAddress: payoutWalletAddress ? payoutWalletAddress.slice(0, 10) + '...' : 'None' }
+    });
+
+    // 1. Format Author & Provenance Header Banner
+    const provenanceHeader = `
+<div style="background: #F9F6F0; border: 2px solid #E5E7EB; border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #926E24;">✨ LOKHA AUTHOR PROVENANCE</div>
+    <div style="font-size: 1.15rem; font-weight: 800; color: #111827; margin-top: 0.2rem;">${escapeHtml(authorName)} <span style="font-size: 0.78rem; font-weight: 700; background: #E0E7FF; color: #3730A3; padding: 0.2rem 0.6rem; border-radius: 999px; margin-left: 0.5rem;">${escapeHtml(model)}</span></div>
+    ${authorBio ? `<div style="font-size: 0.88rem; color: #4B5563; font-style: italic; margin-top: 0.25rem;">${escapeHtml(authorBio)}</div>` : ''}
+  </div>
+  ${payoutWalletAddress ? `
+  <div style="background: #FFF; border: 1.5px solid #C5A059; border-radius: 8px; padding: 0.5rem 0.85rem; font-size: 0.8rem; color: #78350F; font-family: monospace;">
+    ⚡ x402 Base Royalty Wallet:<br/>
+    <strong style="color: #92400E;">${escapeHtml(payoutWalletAddress)}</strong>
+  </div>` : ''}
+</div>
+`;
+
+    // 2. Format Royalty Footer Box
+    const royaltyFooter = payoutWalletAddress ? `
+<div style="background: #FFFDF8; border: 2px solid #C5A059; border-radius: 12px; padding: 1.25rem; margin-top: 2.5rem; text-align: center;">
+  <div style="font-size: 0.95rem; font-weight: 800; color: #926E24; margin-bottom: 0.35rem;">⚡ Value for Value Micro-Royalties</div>
+  <p style="font-size: 0.85rem; color: #665228; line-height: 1.5; margin: 0 auto; max-width: 540px;">
+    This dispatch supports autonomous x402 micro-royalties. Readers streaming on Base send micro-payments directly to the author's verified address: <code>${escapeHtml(payoutWalletAddress)}</code>.
+  </p>
+</div>` : '';
+
+    const fullHtml = `${provenanceHeader}\n${html}\n${royaltyFooter}`;
+
+    // 3. Post to Ghost CMS
+    const ghostPayload = {
+      title,
+      custom_excerpt: excerpt || '',
+      html: fullHtml,
+      tags: [traditionTag, 'author-studio', model.toLowerCase().includes('agent') ? 'synthetic-chronicler' : 'human-author'],
+      feature_image: featureImageUrl || null,
+      status: status === 'draft' ? 'draft' : 'published',
+      visibility: pricingTier === 'members' ? 'members' : 'public'
+    };
+
+    const ghostRes = await executeGhostPost(ghostPayload);
+
+    if (ghostRes.posts && ghostRes.posts.length > 0) {
+      const createdPost = ghostRes.posts[0];
+      
+      logs.unshift({
+        id: 'log-' + Date.now().toString(36),
+        timestamp: new Date().toISOString(),
+        agentId: 'author-studio',
+        level: 'INFO',
+        message: `✨ Post successfully published to Ghost: ${createdPost.url || createdPost.slug}`,
+        meta: { id: createdPost.id, slug: createdPost.slug, url: createdPost.url }
+      });
+
+      return res.status(201).json({
+        success: true,
+        id: createdPost.id,
+        title: createdPost.title,
+        slug: createdPost.slug,
+        url: createdPost.url || `https://lokha.today/${createdPost.slug}/`
+      });
+    } else {
+      throw new Error(JSON.stringify(ghostRes));
+    }
+  } catch (err) {
+    logs.unshift({
+      id: 'log-' + Date.now().toString(36),
+      timestamp: new Date().toISOString(),
+      agentId: 'author-studio',
+      level: 'ERROR',
+      message: `Submission Failed: ${err.message}`,
+      meta: { error: err.message }
+    });
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/memory', (req, res) => {
   res.json({ coreMemory, archivalMemory });
 });
